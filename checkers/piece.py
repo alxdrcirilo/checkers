@@ -37,18 +37,25 @@ class Piece:
         return self.player.value * self.rank.value
 
     @property
-    def symbol(self) -> str | None:
+    def symbol(self) -> str:
         """
         Return <symbol> property.
 
         :return str | None: symbol representing the piece (e.g. '⛀')
         """
-        match self.__hash__():
-            case -2:
-                return "⛁"
-            case -1:
-                return "⛀"
-            case 1:
-                return "⛂"
-            case 2:
-                return "⛃"
+        mappings = {-2: "⛁", -1: "⛀", 1: "⛂", 2: "⛃"}
+        return mappings[self.__hash__()]
+
+    @property
+    def allowed_moves(self) -> list[tuple[int, int]]:
+        """
+        Return moves a piece can make.
+
+        :return list[tuple[int, int]]: list of allowed moves
+        """
+        moves = {
+            Rank.PAWN: {(self.player.value, -1), (self.player.value, 1)},
+            Rank.KING: {(1, -1), (1, 1), (-1, -1), (-1, 1)},
+        }
+
+        return list(moves[self.rank])
