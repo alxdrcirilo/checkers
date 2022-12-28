@@ -47,15 +47,15 @@ class Piece:
         return mappings[self.__hash__()]
 
     @property
-    def allowed_moves(self) -> list[tuple[int, int]]:
+    def directions(self) -> list[tuple[int, int]]:
         """
         Return moves a piece can make.
 
         :return list[tuple[int, int]]: list of allowed moves
         """
-        moves = {
+        dir = {
             Rank.PAWN: {(self.player.value, -1), (self.player.value, 1)},
-            Rank.KING: {(1, -1), (1, 1), (-1, -1), (-1, 1)},
+            Rank.KING: {(-1, -1), (-1, 1), (1, -1), (-1, 1)},
         }
 
-        return list(moves[self.rank])
+        return list(dir[self.rank])

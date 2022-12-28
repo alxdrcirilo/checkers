@@ -79,6 +79,21 @@ class Board:
         """
         return {k: v for k, v in self._state.items() if type(v) is Piece}
 
+    def _is_king(self, piece: Piece, pos: Square) -> None:
+        """
+        Converts a piece's rank to 'KING' if applicable.
+
+        :param Piece piece: piece
+        "param Square pos: position
+        """
+        if piece.rank is Rank.PAWN:
+            x, y = pos
+            if piece.player is Player.BLACK and x == 0:
+                piece.rank = Rank.KING
+
+            elif piece.player is Player.WHITE and x == 7:
+                piece.rank = Rank.KING
+
     def _remove(self, pos: Square) -> None:
         """
         Remove piece at a given (<x>, <y>) position.
@@ -120,12 +135,13 @@ class Board:
 
         return nodes
 
-    def get_moves(self, pos: Square, node: Node) -> Node:
+    def get_moves(self, pos: Square, node: Node, forward: bool | None = None) -> Node:
         """
         Return the moves (tree) a piece can make.
 
         :param Square pos: position
         :param Node node: node (tree)
+        :param bool | None forward: forward direction if 'True' ('None' if rank is 'PAWN')
         :return Node: node (tree) of moves
         """
 
@@ -170,7 +186,14 @@ class Board:
         piece = self.pieces[pos]
         player = piece.player.value
 
-        for dir in piece.allowed_moves:
+        # 'KING' pieces can only chose one direction
+        dirs = piece.directions
+        if forward is True:
+            dirs = [(a, b) for a, b in dirs if a == 1]
+        elif forward is False:
+            dirs = [(a, b) for a, b in dirs if a == -1]
+
+        for dir in dirs:
             x, y = pos
             a, b = dir
             move = tuple((x + a, y + b))
@@ -193,7 +216,13 @@ class Board:
                             child.captured = move
                             node.children.append(child)
 
-                            self.get_moves(next_pos, child)
+                            if piece.rank is Rank.KING:
+                                forward = True if a == 1 else False
+                                print(dir, forward)
+                                self.get_moves(next_pos, child, forward)
+
+                            else:
+                                self.get_moves(next_pos, child)
 
                             # Undo move
                             self.move(piece, next_pos, pos)
@@ -208,6 +237,7 @@ class Board:
     def move(self, piece: Piece, old: Square, new: Square) -> None:
         """
         Move a piece from <old> to <new> position.
+        Check if piece can be converted to 'KING'.
 
         :param Piece piece: piece
         :param Square old: old position
@@ -215,3 +245,5 @@ class Board:
         """
         self.state = (old, 0)
         self.state = (new, piece)
+
+        self._is_king(piece, new)

@@ -167,7 +167,7 @@ class Game:
 
     # TODO: add docstring
     def play(self) -> None:
-        for _ in range(100):
+        while not self.winner:
             logging.info(f"player: {self.player}")
 
             try:
