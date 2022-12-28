@@ -150,7 +150,7 @@ class Game:
 
                 # Remove captured piece
                 self.board._remove(child.captured)
-            
+
                 piece = self.board.state[child.position]
                 self._traverse(piece, child, True)
 
@@ -167,7 +167,23 @@ class Game:
 
     # TODO: add docstring
     def play(self) -> None:
-        logging.info(f"player: {self.player}")
-        self.random_move()
-        self.next_turn()
-        print(self.board)
+        for _ in range(100):
+            logging.info(f"player: {self.player}")
+
+            try:
+                self.random_move()
+
+            except NoMoves as exception:
+                print(exception)
+                self.next_turn()
+                self.winner = self.player
+                break
+
+            except NoPieces as exception:
+                print(exception)
+                self.next_turn()
+                self.winner = self.player
+                break
+
+            self.next_turn()
+            print(self.board)
