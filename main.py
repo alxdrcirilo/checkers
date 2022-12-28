@@ -3,7 +3,8 @@ from checkers.game import Game
 
 def main():
     game = Game()
-    print(game.board)
+    game.play()
+    print(f"{game.winner=}")
 
 
 if __name__ == "__main__":

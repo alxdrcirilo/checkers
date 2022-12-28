@@ -1,3 +1,5 @@
+from collections.abc import Generator
+
 import numpy as np
 
 from checkers.nodes import Node
@@ -77,6 +79,47 @@ class Board:
         """
         return {k: v for k, v in self._state.items() if type(v) is Piece}
 
+    def _remove(self, pos: Square) -> None:
+        """
+        Remove piece at a given (<x>, <y>) position.
+
+        :param Square pos: position
+        """
+        self._state[pos] = None
+
+    def _get_player_pos(self, player: Player) -> Generator:
+        """
+        Return player's pieces positions.
+
+        :param Player player: player
+        :return list: Generator of pieces positions for a given player
+        """
+        for pos, piece in self.pieces.items():
+            if piece.player is player:
+                yield (pos)
+
+    def _get_player_nodes(self, player: Player) -> dict:
+        """
+        Return the player's nodes based on its available pieces.
+
+        :param Player player: player
+        :return dict: dict {<type>: {<position>: <node>}}
+        """
+        nodes = {"jump": dict(), "free": dict()}
+
+        for pos in self._get_player_pos(player):
+            root = Node(pos)
+            node = self.get_moves(pos, root)
+
+            # Only get pieces that can move
+            if node.children:
+                if any([child.captured for child in node.children]):
+                    nodes["jump"][node.position] = node
+                else:
+                    nodes["free"][node.position] = node
+
+        return nodes
+
     def get_moves(self, pos: Square, node: Node) -> Node:
         """
         Return the moves (tree) a piece can make.
@@ -125,7 +168,7 @@ class Board:
             return player != opponent
 
         piece = self.pieces[pos]
-        player = piece.player
+        player = piece.player.value
 
         for dir in piece.allowed_moves:
             x, y = pos
@@ -135,27 +178,30 @@ class Board:
             # Only check allowed moves
             if _is_allowed(move):
 
-                # Capture moves
+                # Busy
                 if self._state[move]:
+
+                    # Check if capture is possible
                     if _is_opponent(move):
                         x, y = move
-                        next_move = tuple((x + a, y + b))
+                        next_pos = tuple((x + a, y + b))
 
-                        if _is_capture(next_move):
-                            self.move(piece, pos, next_move)
+                        if _is_capture(next_pos):
+                            self.move(piece, pos, next_pos)
 
-                            child = Node(next_move, True)
-                            node.add(child)
+                            child = Node(position=next_pos)
+                            child.captured = move
+                            node.children.append(child)
 
-                            self.get_moves(next_move, child)
+                            self.get_moves(next_pos, child)
 
-                            # Undo
-                            self.move(piece, next_move, pos)
+                            # Undo move
+                            self.move(piece, next_pos, pos)
 
-                # Free moves
+                # Free
                 else:
-                    child = Node(move, False)
-                    node.add(child)
+                    child = Node(position=move)
+                    node.children.append(child)
 
         return node
 

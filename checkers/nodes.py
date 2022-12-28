@@ -1,14 +1,18 @@
-class Node:
-    def __init__(
-        self,
-        position: tuple[int, int] = (0, 0),
-        capture: bool = False,
-    ) -> None:
-        self.parent = None
-        self.position = position
-        self.children = list()
-        self.capture = capture
+from __future__ import annotations
 
-    def add(self, child) -> None:
-        self.children.append(child)
-        child.parent = self
+from dataclasses import dataclass, field
+
+
+@dataclass
+class Node:
+    """
+    Node dataclass.
+
+    Contains <captured>, <children>, and <position> attributes.
+    """
+
+    Square = tuple[int, int]
+
+    position: Square
+    captured: Square | None = field(default=None)
+    children: list[Node] = field(default_factory=list)
