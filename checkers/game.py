@@ -129,8 +129,14 @@ class Game:
             else:
                 raise NoPieces(self.player)
 
-    # TODO: add docstring
     def _traverse(self, piece: Piece, node: Node, capture: bool = False) -> None:
+        """
+        Traverse the board with a given piece.
+
+        :param Piece piece: piece
+        :param Node node: node
+        :param bool capture: 'True' if parent node is capturing, defaults to False
+        """
         # Force jumps
         if capture:
             jumps = [x for x in node.children if x.captured]
@@ -165,8 +171,10 @@ class Game:
 
             # yield child.position
 
-    # TODO: add docstring
     def play(self) -> None:
+        """
+        Play the game.
+        """
         while not self.winner:
             logging.info(f"player: {self.player}")
 
