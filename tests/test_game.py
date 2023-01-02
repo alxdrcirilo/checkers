@@ -1,8 +1,8 @@
 import pytest
 
-from checkers.board import Board
-from checkers.game import Game
-from checkers.piece import Player
+from checkers.logic.board import Board
+from checkers.logic.game import Game
+from checkers.logic.piece import Player
 
 
 @pytest.fixture

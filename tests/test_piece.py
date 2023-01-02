@@ -1,6 +1,6 @@
 import pytest
 
-from checkers.piece import Piece, Player, Rank
+from checkers.logic.piece import Piece, Player, Rank
 
 
 class TestPiece:

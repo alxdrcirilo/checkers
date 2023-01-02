@@ -1,7 +1,7 @@
 import pytest
 
-from checkers.board import Board
-from checkers.piece import Piece, Player, Rank
+from checkers.logic.board import Board
+from checkers.logic.piece import Piece, Player, Rank
 
 
 @pytest.fixture

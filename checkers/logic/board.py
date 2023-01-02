@@ -2,8 +2,8 @@ from collections.abc import Generator
 
 import numpy as np
 
-from checkers.nodes import Node
-from checkers.piece import Piece, Player, Rank
+from checkers.logic.nodes import Node
+from checkers.logic.piece import Piece, Player, Rank
 
 
 class Board:

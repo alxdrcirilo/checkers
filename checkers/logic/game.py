@@ -1,9 +1,9 @@
 import logging
 from random import choice
 
-from checkers.board import Board
-from checkers.nodes import Node
-from checkers.piece import Piece, Player
+from checkers.logic.board import Board
+from checkers.logic.nodes import Node
+from checkers.logic.piece import Piece, Player
 
 logging.basicConfig(level=logging.INFO)
 
