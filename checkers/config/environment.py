@@ -40,14 +40,11 @@ class Environment(Window):
 
                     # Highligh available moves to selected piece
                     self.SELECTED_PIECE = piece_sprite
-                    self.SELECTED_PIECE.focus(unselect=False)
                     self._get_available_moves(self.SELECTED_PIECE)
 
         else:
             for square_sprite in self.squares_sprites:
                 if square_sprite.rect.collidepoint(x, y):
-                    # Unselect piece
-                    self.SELECTED_PIECE.focus(unselect=True)
 
                     # Make move if move in allowed moves for selected piece
                     move = (square_sprite.row, square_sprite.col)
