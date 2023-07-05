@@ -34,50 +34,48 @@ class Environment(Window):
         if not self.SELECTED_PIECE:
             for piece_sprite in self.pieces_sprites:
                 if piece_sprite.rect.collidepoint(x, y):
+                    # Log selected piece
+                    position = (piece_sprite.x, piece_sprite.y)
+                    logging.info(f"{piece_sprite.data} SELECTED at {position}")
+
+                    # Highligh available moves to selected piece
                     self.SELECTED_PIECE = piece_sprite
                     self.SELECTED_PIECE.focus(unselect=False)
                     self._get_available_moves(self.SELECTED_PIECE)
-                    break
 
         else:
             for square_sprite in self.squares_sprites:
                 if square_sprite.rect.collidepoint(x, y):
+                    # Unselect piece
                     self.SELECTED_PIECE.focus(unselect=True)  # type: ignore
 
-                    if (square_sprite.row, square_sprite.col) in self.next_moves.keys():
+                    # Make move if move in allowed moves for selected piece
+                    move = (square_sprite.row, square_sprite.col)
+                    if move in self.next_moves.keys():
+                        piece = self.SELECTED_PIECE.data
+                        pos = (self.SELECTED_PIECE.x, self.SELECTED_PIECE.y)
                         self.board.move(
-                            piece=self.SELECTED_PIECE.data,  # type: ignore
-                            old=(self.SELECTED_PIECE.x, self.SELECTED_PIECE.y),  # type: ignore
-                            new=(square_sprite.row, square_sprite.col),
+                            piece=piece,
+                            old=pos,
+                            new=move,
                         )
+                        logging.info(f"{piece} MOVED from {pos} to {move}")
 
-                        self.SELECTED_PIECE.x = square_sprite.row  # type: ignore
-                        self.SELECTED_PIECE.y = square_sprite.col  # type: ignore
-                        self.SELECTED_PIECE.move(  # type: ignore
-                            left=self._get_coords(square_sprite.col),
-                            top=self._get_coords(square_sprite.row),
-                        )
+                        captured_position = self.next_moves.get(move)
+                        if captured_position:
+                            captured_piece = self.board.pieces[captured_position]
+                            self.board._remove(pos=captured_position)
+                            logging.info(
+                                f"{captured_piece} CAPTURED at {captured_position}"
+                            )
 
-                        captured_pos = self.next_moves.get(
-                            (square_sprite.row, square_sprite.col)
-                        )
-                        if captured_pos:
-                            self.board._remove(pos=captured_pos)
-                            for piece_sprite in self.pieces_sprites:
-                                if (piece_sprite.x, piece_sprite.y) == captured_pos:
-                                    self.pieces_sprites.remove(piece_sprite)
-
-                        self.SELECTED_PIECE = None
-
-                        for square_sprite in self.squares_sprites:
-                            square_sprite.reset()
+                        # Update the pygame board
+                        self._update_board()
+                        self._reset_board()
 
                     else:
-                        print("Not allowed")
-                        self.SELECTED_PIECE = None
-                        # Duplicated
-                        for square_sprite in self.squares_sprites:
-                            square_sprite.reset()
+                        logging.warning(f"Move {move} not allowed!")
+                        self._reset_board()
 
     def play(self):
         """
