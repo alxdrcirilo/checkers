@@ -45,7 +45,6 @@ class Environment(Window):
         else:
             for square_sprite in self.squares_sprites:
                 if square_sprite.rect.collidepoint(x, y):
-
                     # Make move if move in allowed moves for selected piece
                     move = (square_sprite.row, square_sprite.col)
                     if move in self.next_moves.keys():
@@ -90,7 +89,7 @@ class Environment(Window):
                 x, y = pygame.mouse.get_pos()
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     self.select_piece(x, y)
-                
+
                 else:
                     self.hover(x, y)
 
