@@ -28,7 +28,7 @@ class TestGame:
         assert game.winner is Player.BLACK
 
     def test_stats(self, game: Game) -> None:
-        assert game.stats == "self.winner=None\nself._turn=0"
+        assert game.stats == "self.winner=None\nself._turn=1"
 
     @pytest.mark.parametrize("player", [Player.BLACK, Player.WHITE])
     def test_no_moves_exception(self, player: Player) -> None:
