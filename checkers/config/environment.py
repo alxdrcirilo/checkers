@@ -2,6 +2,7 @@ import sys
 
 import pygame
 
+from checkers.config.logging import logging
 from checkers.graphics.sprites.piece import PieceSprite
 from checkers.graphics.window import Window
 
@@ -20,6 +21,7 @@ class Environment(Window):
         :ivar SELECTED_PIECE: currently selected game piece
         """
         super().__init__()
+        logging.info(f"Started game with {self.player}")
         self.SELECTED_PIECE: PieceSprite | None = None
 
     def select_piece(self, x: int, y: int) -> None:
@@ -36,6 +38,7 @@ class Environment(Window):
                     self.SELECTED_PIECE.focus(unselect=False)
                     self._get_available_moves(self.SELECTED_PIECE)
                     break
+
         else:
             for square_sprite in self.squares_sprites:
                 if square_sprite.rect.collidepoint(x, y):
