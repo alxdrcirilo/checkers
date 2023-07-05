@@ -180,18 +180,18 @@ class Window(MockGame):
         for jump, capture in self.next_moves.items():
             jump_x, jump_y = self._get_coords(jump[1]), self._get_coords(jump[0])
 
-            for square in self.squares_sprites:
-                if square.rect.collidepoint(jump_x, jump_y):
-                    square.color = JUMP
+            for square_sprite in self.squares_sprites:
+                if square_sprite.rect.collidepoint(jump_x, jump_y):
+                    square_sprite.color = JUMP
                     break
 
             if capture:
                 capture_x, capture_y = self._get_coords(capture[1]), self._get_coords(
                     capture[0]
                 )
-                for square in self.squares_sprites:
-                    if square.rect.collidepoint(capture_x, capture_y):
-                        square.color = CAPTURE
+                for square_sprite in self.squares_sprites:
+                    if square_sprite.rect.collidepoint(capture_x, capture_y):
+                        square_sprite.color = CAPTURE
                         break
 
             # Update board
@@ -203,14 +203,14 @@ class Window(MockGame):
         """
         Blink available moves for selected piece.
         """
-        if self.SELECTED_PIECE:  # type: ignore
+        if self.SELECTED_PIECE:
             current_time = pygame.time.get_ticks()
             if current_time - self.TIMER >= self.BLINK_INTERVAL:
                 self.HIGHLIGHT_SQUARE = not self.HIGHLIGHT_SQUARE
                 self.TIMER = current_time
 
             if self.HIGHLIGHT_SQUARE:
-                self._get_available_moves(self.SELECTED_PIECE)  # type: ignore
+                self._get_available_moves(self.SELECTED_PIECE)
             else:
                 for square in self.squares_sprites:
                     square.reset()

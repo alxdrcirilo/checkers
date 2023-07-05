@@ -47,7 +47,7 @@ class Environment(Window):
             for square_sprite in self.squares_sprites:
                 if square_sprite.rect.collidepoint(x, y):
                     # Unselect piece
-                    self.SELECTED_PIECE.focus(unselect=True)  # type: ignore
+                    self.SELECTED_PIECE.focus(unselect=True)
 
                     # Make move if move in allowed moves for selected piece
                     move = (square_sprite.row, square_sprite.col)
