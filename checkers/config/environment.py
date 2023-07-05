@@ -76,9 +76,9 @@ class Environment(Window):
                         for square_sprite in self.squares_sprites:
                             square_sprite.reset()
 
-    def show(self):
+    def play(self):
         """
-        Display the game environment.
+        Start the game environment.
         """
         clock = pygame.time.Clock()
         clock.tick(60)
