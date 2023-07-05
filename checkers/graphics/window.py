@@ -139,18 +139,21 @@ class Window(MockGame):
 
         :param PieceSprite piece_sprite: the sprite representing the piece
         """
-        available_moves = self.board._get_player_moves(
-            player=piece_sprite.data.player,
-            position=(piece_sprite.x, piece_sprite.y),
-        )[(piece_sprite.x, piece_sprite.y)]
 
-        # print(f"{available_moves=}")
+        # Get moves (paths) that selected piece can make
+        piece_position = (piece_sprite.x, piece_sprite.y)
+        all_moves = self.board._get_player_moves(
+            player=piece_sprite.data.player,
+            position=piece_position,
+        )[piece_position]
+
+        # Get imminent next moves
         self.next_moves = {}
-        for move in available_moves:
+        for move in all_moves:
             jump, capture = move.pop(1)
             self.next_moves[jump] = capture
-        # print(f"{self.next_moves=}")
 
+        # Change square sprite(s) color attributes based on type of move (JUMP or CAPTURE)
         for jump, capture in self.next_moves.items():
             jump_x, jump_y = self._get_coords(jump[1]), self._get_coords(jump[0])
 
@@ -168,6 +171,7 @@ class Window(MockGame):
                         square.color = CAPTURE
                         break
 
+            # Update board
             self.squares_sprites.update()
             self.squares_sprites.draw(self.screen)
             self.pieces_sprites.draw(self.screen)
