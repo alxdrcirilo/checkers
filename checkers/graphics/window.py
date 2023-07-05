@@ -214,3 +214,17 @@ class Window(MockGame):
             else:
                 for square in self.squares_sprites:
                     square.reset()
+
+    def hover(self, x: int, y: int) -> None:
+        """
+        Hover a piece on the board and focus if piece belongs to current player.
+
+        :param int x: x coordinate of the hovered position
+        :param int y: y coordinate of the hovered position
+        """
+        for piece_sprite in self.pieces_sprites:
+            if piece_sprite.rect.collidepoint(x, y):
+                if piece_sprite.data.player is self.player:
+                    piece_sprite.focus(unselect=False)
+            else:
+                piece_sprite.focus(unselect=True)

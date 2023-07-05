@@ -93,6 +93,9 @@ class Environment(Window):
                 x, y = pygame.mouse.get_pos()
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     self.select_piece(x, y)
+                
+                else:
+                    self.hover(x, y)
 
             self.blink()
 
