@@ -5,6 +5,7 @@ import pygame
 from checkers.config.logging import logging
 from checkers.graphics.sprites.piece import PieceSprite
 from checkers.graphics.window import Window
+from checkers.logic.piece import Player
 
 
 class Environment(Window):
@@ -19,10 +20,18 @@ class Environment(Window):
         Initialize the environment.
 
         :ivar SELECTED_PIECE: currently selected game piece
+        :ivar HUMAN_PLAYER: human player (BLACK piece)
         """
         super().__init__()
-        logging.info(f"Started game with {self.player}")
+
+        # Initialize default variables
         self.SELECTED_PIECE: PieceSprite | None = None
+        self.HUMAN_PLAYER: Player = Player.BLACK
+
+        # Set human player as starting player
+        self.player = self.HUMAN_PLAYER
+
+        logging.info(f"Started game with {self.HUMAN_PLAYER}")
 
     def select_piece(self, x: int, y: int) -> None:
         """
@@ -34,13 +43,20 @@ class Environment(Window):
         if not self.SELECTED_PIECE:
             for piece_sprite in self.pieces_sprites:
                 if piece_sprite.rect.collidepoint(x, y):
-                    # Log selected piece
-                    position = (piece_sprite.x, piece_sprite.y)
-                    logging.info(f"{piece_sprite.data} SELECTED at {position}")
+                    if piece_sprite.data.player is self.HUMAN_PLAYER:
+                        # Log selected piece
+                        position = (piece_sprite.x, piece_sprite.y)
+                        logging.info(f"{piece_sprite.data} SELECTED at {position}")
 
-                    # Highligh available moves to selected piece
-                    self.SELECTED_PIECE = piece_sprite
-                    self._get_available_moves(self.SELECTED_PIECE)
+                        # Highligh available moves to selected piece
+                        self.SELECTED_PIECE = piece_sprite
+                        self._get_available_moves(self.SELECTED_PIECE)
+
+                    else:
+                        logging.warning(
+                            f"Can't select piece from {Player(-self.HUMAN_PLAYER.value)}!"
+                        )
+                        self._reset_board()
 
         else:
             for square_sprite in self.squares_sprites:
