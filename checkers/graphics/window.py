@@ -26,21 +26,19 @@ class Window(MockGame):
         Initializes the Window class.
 
         :param int resolution: size of the game, defaults to 512 pixels
-        :ivar BLINK_INTERVAL: The interval (in milliseconds) for blinking
-        :ivar HIGHLIGHT_SQUARE: Indicates whether squares should be highlighted
-        :ivar SELECTED_PIECE: The currently selected game piece
-        :ivar TIMER: The timer value
-        :ivar size: The size of the window
-        :ivar screen: The pygame screen object
-        :ivar pieces: The pygame sprite group for game pieces
-        :ivar squares: The pygame sprite group for squares
+        :ivar BLINK_INTERVAL: interval (in milliseconds) for blinking
+        :ivar HIGHLIGHT_SQUARE: indicates whether squares should be highlighted
+        :ivar TIMER: timer value
+        :ivar size: size of the window
+        :ivar screen: pygame screen object
+        :ivar pieces: pygame sprite group for game pieces
+        :ivar squares: pygame sprite group for squares
         """
         super().__init__()
 
         # Blinking variables
         self.BLINK_INTERVAL = 400
         self.HIGHLIGHT_SQUARE = True
-        self.SELECTED_PIECE = None
         self.TIMER = 0
 
         # Setup screen
@@ -48,15 +46,15 @@ class Window(MockGame):
         self.screen = pygame.display.set_mode(self.size)
 
         # Setup sprites
-        self.pieces = pygame.sprite.Group()
-        self.squares = pygame.sprite.Group()
+        self.pieces_sprites = pygame.sprite.Group()
+        self.squares_sprites = pygame.sprite.Group()
 
         self.__get_squares()
         self.__get_pieces()
         self.__draw_board()
 
     @staticmethod
-    def __get_coords(x: int) -> int:
+    def _get_coords(x: int) -> int:
         """
         Get the coordinates in pixels based on the row|column (x) for a piece sprite.
 
@@ -114,7 +112,7 @@ class Window(MockGame):
             square_sprite = SquareSprite(color, SIZE, SIZE, row, col)
             square_sprite.rect.x = left
             square_sprite.rect.y = top
-            self.squares.add(square_sprite)
+            self.squares_sprites.add(square_sprite)
 
     def __get_pieces(self) -> None:
         """
@@ -127,15 +125,15 @@ class Window(MockGame):
                 piece_sprite = PieceSprite(
                     color=color,
                     size=PIECE_SIZE,
-                    left=self.__get_coords(col),
-                    top=self.__get_coords(row),
+                    left=self._get_coords(col),
+                    top=self._get_coords(row),
                     x=row,
                     y=col,
                     data=piece,
                 )
-                self.pieces.add(piece_sprite)
+                self.pieces_sprites.add(piece_sprite)
 
-    def __get_available_moves(self, piece_sprite: PieceSprite) -> None:
+    def _get_available_moves(self, piece_sprite: PieceSprite) -> None:
         """
         Get available moves for a given piece sprite.
 
@@ -154,90 +152,38 @@ class Window(MockGame):
         # print(f"{self.next_moves=}")
 
         for jump, capture in self.next_moves.items():
-            jump_x, jump_y = self.__get_coords(jump[1]), self.__get_coords(jump[0])
+            jump_x, jump_y = self._get_coords(jump[1]), self._get_coords(jump[0])
 
-            for square in self.squares:
+            for square in self.squares_sprites:
                 if square.rect.collidepoint(jump_x, jump_y):
                     square.color = JUMP
                     break
 
             if capture:
-                capture_x, capture_y = self.__get_coords(capture[1]), self.__get_coords(
+                capture_x, capture_y = self._get_coords(capture[1]), self._get_coords(
                     capture[0]
                 )
-                for square in self.squares:
+                for square in self.squares_sprites:
                     if square.rect.collidepoint(capture_x, capture_y):
                         square.color = CAPTURE
                         break
 
-            self.squares.update()
-            self.squares.draw(self.screen)
-            self.pieces.draw(self.screen)
-
-    def select_piece(self, x: int, y: int) -> None:
-        """
-        Select a piece on the board.
-
-        :param int x: x coordinate of the click position
-        :param int y: y coordinate of the click position
-        """
-        if not self.SELECTED_PIECE:
-            for piece in self.pieces:
-                if piece.rect.collidepoint(x, y):
-                    self.SELECTED_PIECE = piece
-                    self.SELECTED_PIECE.focus(unselect=False)
-                    self.__get_available_moves(self.SELECTED_PIECE)
-                    break
-        else:
-            for square in self.squares:
-                if square.rect.collidepoint(x, y):
-                    self.SELECTED_PIECE.focus(unselect=True)
-
-                    if (square.row, square.col) in self.next_moves.keys():
-                        self.board.move(
-                            piece=self.SELECTED_PIECE.data,
-                            old=(self.SELECTED_PIECE.x, self.SELECTED_PIECE.y),
-                            new=(square.row, square.col),
-                        )
-
-                        self.SELECTED_PIECE.x = square.row
-                        self.SELECTED_PIECE.y = square.col
-                        self.SELECTED_PIECE.move(
-                            left=self.__get_coords(square.col),
-                            top=self.__get_coords(square.row),
-                        )
-
-                        captured_pos = self.next_moves.get((square.row, square.col))
-                        if captured_pos:
-                            self.board._remove(pos=captured_pos)
-                            for piece in self.pieces:
-                                if (piece.x, piece.y) == captured_pos:
-                                    self.pieces.remove(piece)
-
-                        self.SELECTED_PIECE = None
-
-                        for square in self.squares:
-                            square.reset()
-
-                    else:
-                        print("Not allowed")
-                        self.SELECTED_PIECE = None
-                        # Duplicated
-                        for square in self.squares:
-                            square.reset()
+            self.squares_sprites.update()
+            self.squares_sprites.draw(self.screen)
+            self.pieces_sprites.draw(self.screen)
 
     def blink(self) -> None:
         """
         Blink available moves for selected piece.
         """
-        if self.SELECTED_PIECE:
+        if self.SELECTED_PIECE:  # type: ignore
             current_time = pygame.time.get_ticks()
             if current_time - self.TIMER >= self.BLINK_INTERVAL:
                 self.HIGHLIGHT_SQUARE = not self.HIGHLIGHT_SQUARE
                 self.TIMER = current_time
 
             if self.HIGHLIGHT_SQUARE:
-                self.__get_available_moves(self.SELECTED_PIECE)
+                self._get_available_moves(self.SELECTED_PIECE)  # type: ignore
             else:
-                for square in self.squares:
+                for square in self.squares_sprites:
                     square.reset()
