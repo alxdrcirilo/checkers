@@ -100,6 +100,29 @@ class Window(MockGame):
                 end = (left + SIZE, top + SIZE)
                 pygame.draw.line(self.screen, GRAY, start, end, width)
 
+    def _update_board(self) -> None:
+        """
+        Update the board based on its state.
+
+        Clears all piece sprites.
+        Gets new piece sprites based on new board state.
+        Draws new piece sprites.
+        """
+        self.pieces_sprites.empty()
+        self.__get_pieces()
+        self.pieces_sprites.draw(self.screen)
+
+    def _reset_board(self) -> None:
+        """
+        Reset the board based on its state.
+
+        Clears highlighted moves.
+        Unselects focused pieces.
+        """
+        self.SELECTED_PIECE = None
+        for square_sprite in self.squares_sprites:
+            square_sprite.reset()
+
     def __get_squares(self) -> None:
         """
         Create and add square sprites to the sprite group.
