@@ -6,10 +6,22 @@ from checkers.graphics.window import Window
 
 
 class Environment(Window):
+    """
+    Environment class.
+
+    Represents the game environment.
+    """
+
     def __init__(self) -> None:
+        """
+        Initialize the environment.
+        """
         super().__init__()
 
     def show(self):
+        """
+        Display the game environment.
+        """
         clock = pygame.time.Clock()
         clock.tick(60)
 
