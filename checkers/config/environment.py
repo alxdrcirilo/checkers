@@ -2,10 +2,10 @@ import sys
 
 import pygame
 
-from checkers.config.logging import logging
 from checkers.graphics.sprites.piece import PieceSprite
 from checkers.graphics.window import Window
 from checkers.logic.piece import Player
+from checkers.utils.logging import logging
 
 
 class Environment(Window):
@@ -35,7 +35,7 @@ class Environment(Window):
         # Set human player as starting player
         self.player = self.HUMAN_PLAYER
         logging.info(f"Started game with {self.HUMAN_PLAYER}")
-    
+
     def __stop_multiple_capture(self):
         """
         Helper method to stop multiple capture.
