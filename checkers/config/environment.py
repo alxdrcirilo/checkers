@@ -35,6 +35,15 @@ class Environment(Window):
         # Set human player as starting player
         self.player = self.HUMAN_PLAYER
         logging.info(f"Started game with {self.HUMAN_PLAYER}")
+    
+    def __stop_multiple_capture(self):
+        """
+        Helper method to stop multiple capture.
+        """
+        self.next_turn()
+        logging.info(f"Next turn: {self.turn} player: {self.player}")
+        self.PLAYER_MOVES = self.board._get_player_moves(self.player)
+        self.MULTIPLE_CAPTURE = None
 
     def select_piece(self, x: int, y: int) -> None:
         """
@@ -43,6 +52,7 @@ class Environment(Window):
         :param int x: x coordinate of the click position
         :param int y: y coordinate of the click position
         """
+
         if not self.SELECTED_PIECE:
             for piece_sprite in self.pieces_sprites:
                 if piece_sprite.rect.collidepoint(x, y):
@@ -115,26 +125,10 @@ class Environment(Window):
                                 self.MULTIPLE_CAPTURE = (x, y)
 
                             else:
-                                # Reset player to next player
-                                self.next_turn()
-                                logging.info(
-                                    f"Next turn: {self.turn} player: {self.player}"
-                                )
-                                self.PLAYER_MOVES = self.board._get_player_moves(
-                                    self.player
-                                )
-                                self.MULTIPLE_CAPTURE = None
+                                self.__stop_multiple_capture()
 
                         else:
-                            # Reset player to next player
-                            self.next_turn()
-                            logging.info(
-                                f"Next turn: {self.turn} player: {self.player}"
-                            )
-                            self.PLAYER_MOVES = self.board._get_player_moves(
-                                self.player
-                            )
-                            self.MULTIPLE_CAPTURE = None
+                            self.__stop_multiple_capture()
 
                     elif self.MULTIPLE_CAPTURE:
                         logging.warning(
