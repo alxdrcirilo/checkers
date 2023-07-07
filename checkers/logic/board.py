@@ -124,7 +124,49 @@ class Board:
             if piece.player is player:
                 yield (pos)
 
-    def _get_player_moves(self, player: Player, position: Cell | None = None) -> dict:
+    def _get_player_moves(self, player: Player) -> list:
+        """
+        Return the positions of the pieces that a given player can move.
+
+        :param Player player: player
+        :return list: pieces positions that a given player can move
+        """
+        allowed_moves = self._get_capture_player_moves(player)
+        if not allowed_moves:
+            allowed_moves = list(self._get_all_player_moves(player).keys())
+
+        return allowed_moves
+
+    def _get_capture_player_moves(self, player: Player) -> list:
+        """
+        Return the positions of the pieces that can capture other pieces for a given player.
+
+        :param Player player: player
+        :return list: pieces positions for a given player than can capture opponent pieces
+        """
+        capture_player_moves = {}
+        player_moves = self._get_all_player_moves(player)
+
+        for position, moves in player_moves.items():
+            captures = []
+            for move in moves:
+                if isinstance(move[1], tuple):
+                    captures.append(move[1][1])
+                else:
+                    captures.append(None)
+
+            capture_player_moves[position] = list(set(captures))
+
+            if capture_player_moves[position] != [None]:
+                capture_player_moves[position] = True
+            else:
+                capture_player_moves[position] = False
+
+        return [pos for pos, capture in capture_player_moves.items() if capture]
+
+    def _get_all_player_moves(
+        self, player: Player, position: Cell | None = None
+    ) -> dict:
         """
         Return the player's nodes based on its available pieces.
         Kings have special move attributes depending on the board configuration.

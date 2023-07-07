@@ -105,7 +105,7 @@ class TestBoard:
         ],
     )
     def test_get_player_moves(self, board: Board, expected: Generator) -> None:
-        assert list(board._get_player_moves(player=Player.BLACK)) == expected
+        assert list(board._get_all_player_moves(player=Player.BLACK)) == expected
 
     @pytest.mark.skip("WIP`")
     def test_get_piece_moves(self, board: Board) -> None:
