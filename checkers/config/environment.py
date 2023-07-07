@@ -92,38 +92,48 @@ class Environment(Window):
                                 f"{captured_piece} CAPTURED at {captured_position}"
                             )
 
-                        # Next turn
-                        self.next_turn()
-                        logging.info(f"Next turn: {self.turn} player: {self.player}")
-
-                        # Get new available moves
-                        self.PLAYER_MOVES = self.board._get_player_moves(self.player)
-
                         # Update the board
                         self._update_board()
 
                         # Reset the board
                         self._reset_board()
 
+                        # Get player moves
+                        self.PLAYER_MOVES = self.board._get_player_moves(self.player)
+
                         # Handle multiple capture moves
                         if max([len(move) for move in self.piece_moves]) > 1:
-                            # Override player because of multiple capture
-                            self.player = Player(-self.player.value)
-                            self.PLAYER_MOVES = self.board._get_player_moves(
-                                self.player
-                            )
-
                             # Force selecting multiple jump piece if path can continue
                             if move in self.PLAYER_MOVES:
+                                # Next turn
+                                self.next_turn(multiple_jump=True)
+                                logging.info(
+                                    f"Next turn: {self.turn} player: {self.player}"
+                                )
+                                # Select same piece with multiple jump
                                 self.select_piece(x, y)
                                 self.MULTIPLE_CAPTURE = (x, y)
+
                             else:
                                 # Reset player to next player
-                                self.player = Player(-self.player.value)
+                                self.next_turn()
+                                logging.info(
+                                    f"Next turn: {self.turn} player: {self.player}"
+                                )
                                 self.PLAYER_MOVES = self.board._get_player_moves(
                                     self.player
                                 )
+                                self.MULTIPLE_CAPTURE = None
+
                         else:
+                            # Reset player to next player
+                            self.next_turn()
+                            logging.info(
+                                f"Next turn: {self.turn} player: {self.player}"
+                            )
+                            self.PLAYER_MOVES = self.board._get_player_moves(
+                                self.player
+                            )
                             self.MULTIPLE_CAPTURE = None
 
                     elif self.MULTIPLE_CAPTURE:
@@ -156,6 +166,7 @@ class Environment(Window):
                     if not self.MULTIPLE_CAPTURE:
                         self.hover(x, y)
                     else:
+                        # If in multiple capture, force focus on piece
                         x, y = self.MULTIPLE_CAPTURE
                         self.hover(x, y)
 

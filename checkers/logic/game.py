@@ -98,9 +98,12 @@ class Game:
         """
         return self._turn
 
-    def next_turn(self) -> None:
+    def next_turn(self, multiple_jump: bool = False) -> None:
         """
         Set the next player.
+
+        :param bool multiple_jump: True if player is doing multiple jump
         """
-        self.player = Player(-self.player.value)
+        if not multiple_jump:
+            self.player = Player(-self.player.value)
         self._turn += 1
