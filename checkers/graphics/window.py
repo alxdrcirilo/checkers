@@ -165,14 +165,14 @@ class Window(MockGame):
 
         # Get moves (paths) that selected piece can make
         piece_position = (piece_sprite.x, piece_sprite.y)
-        all_moves = self.board._get_player_moves(
+        self.piece_moves = self.board._get_all_player_moves(
             player=piece_sprite.data.player,
             position=piece_position,
         )[piece_position]
 
         # Get imminent next moves
         self.next_moves = {}
-        for move in all_moves:
+        for move in self.piece_moves:
             jump, capture = move.pop(1)
             self.next_moves[jump] = capture
 
@@ -222,9 +222,14 @@ class Window(MockGame):
         :param int x: x coordinate of the hovered position
         :param int y: y coordinate of the hovered position
         """
+        allowed_moves = self.board._get_player_moves(self.player)
         for piece_sprite in self.pieces_sprites:
             if piece_sprite.rect.collidepoint(x, y):
-                if piece_sprite.data.player is self.player:
+                piece_sprite_position = (piece_sprite.x, piece_sprite.y)
+                if (
+                    piece_sprite.data.player is self.player
+                    and piece_sprite_position in allowed_moves
+                ):
                     piece_sprite.focus(unselect=False)
             else:
                 piece_sprite.focus(unselect=True)
