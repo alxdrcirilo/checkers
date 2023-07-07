@@ -1,4 +1,5 @@
 from collections.abc import Generator
+from random import choice
 
 import numpy as np
 
@@ -314,3 +315,14 @@ class Board:
         self.state = (new, piece)
 
         self._is_king(piece, new)
+
+    def _get_random_move(self, player: Player) -> list[Cell]:
+        """
+        Return a random move by a given player.
+
+        :param Player player: player
+        :return Cell: position of random move
+        """
+        random_piece = choice(self._get_player_moves(player))
+        random_move = choice(self._get_all_player_moves(player, random_piece)[random_piece])
+        return random_move
