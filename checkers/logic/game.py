@@ -24,7 +24,7 @@ class Game:
         self._board = Board()
         self._player = Player.BLACK
         self._winner = None
-        self._turn = 0
+        self._turn = 1
 
     @property
     def board(self) -> Board:
@@ -88,6 +88,15 @@ class Game:
         :return str: statistics
         """
         return f"{self.winner=}\n{self._turn=}"
+
+    @property
+    def turn(self) -> int:
+        """
+        Return the turn number (e.g. 24).
+
+        :return int: turn
+        """
+        return self._turn
 
     def next_turn(self) -> None:
         """

@@ -43,15 +43,6 @@ class PieceSprite(pygame.sprite.Sprite):
         self.image = pygame.transform.scale(self.image, self.size)
         self.rect = pygame.Rect(left, top, size, size)
 
-    def move(self, left: int, top: int) -> None:
-        """
-        Move the piece to a new position.
-
-        :param int left: left position of the new position
-        :param int top: top position of the new position
-        """
-        self.rect = pygame.Rect(left, top, self.size[0], self.size[1])
-
     def focus(self, unselect: bool = True) -> None:
         """
         Click on a piece sprite and change its image to show focus.

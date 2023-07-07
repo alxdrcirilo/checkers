@@ -3,7 +3,7 @@ from checkers.config.environment import Environment
 
 def main():
     checkers = Environment()
-    checkers.show()
+    checkers.play()
 
 
 if __name__ == "__main__":

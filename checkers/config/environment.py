@@ -2,8 +2,10 @@ import sys
 
 import pygame
 
+from checkers.config.logging import logging
 from checkers.graphics.sprites.piece import PieceSprite
 from checkers.graphics.window import Window
+from checkers.logic.piece import Player
 
 
 class Environment(Window):
@@ -17,10 +19,22 @@ class Environment(Window):
         """
         Initialize the environment.
 
+        :ivar PLAYER_MOVES: list of pieces (positions) that the current player can move
+        :ivar HUMAN_PLAYER: human player (BLACK piece)
+        :ivar MULTIPLE_CAPTURE: (x, y) pixel coordinates of piece position if in multiple capture path
         :ivar SELECTED_PIECE: currently selected game piece
         """
         super().__init__()
+
+        # Initialize instance variables
+        self.PLAYER_MOVES: list = self.board._get_player_moves(self.player)
+        self.HUMAN_PLAYER: Player = Player.BLACK
+        self.MULTIPLE_CAPTURE: tuple | None = None
         self.SELECTED_PIECE: PieceSprite | None = None
+
+        # Set human player as starting player
+        self.player = self.HUMAN_PLAYER
+        logging.info(f"Started game with {self.HUMAN_PLAYER}")
 
     def select_piece(self, x: int, y: int) -> None:
         """
@@ -32,53 +46,98 @@ class Environment(Window):
         if not self.SELECTED_PIECE:
             for piece_sprite in self.pieces_sprites:
                 if piece_sprite.rect.collidepoint(x, y):
-                    self.SELECTED_PIECE = piece_sprite
-                    self.SELECTED_PIECE.focus(unselect=False)
-                    self._get_available_moves(self.SELECTED_PIECE)
-                    break
+                    if piece_sprite.data.player is self.player:
+                        piece_sprite_position = (piece_sprite.x, piece_sprite.y)
+                        if piece_sprite_position in self.PLAYER_MOVES:
+                            # Log selected piece
+                            position = (piece_sprite.x, piece_sprite.y)
+                            logging.info(f"{piece_sprite.data} SELECTED at {position}")
+
+                            # Highligh available moves to selected piece
+                            self.SELECTED_PIECE = piece_sprite
+                            self._get_available_moves(self.SELECTED_PIECE)
+
+                        else:
+                            logging.warning(
+                                f"Can't select piece {piece_sprite.data}. There are pieces with capture moves."
+                            )
+
+                    else:
+                        logging.warning(
+                            f"Can't select piece from {Player(-self.player.value)} when current player is {self.player}!"
+                        )
+                        self._reset_board()
+
         else:
             for square_sprite in self.squares_sprites:
                 if square_sprite.rect.collidepoint(x, y):
-                    self.SELECTED_PIECE.focus(unselect=True)  # type: ignore
-
-                    if (square_sprite.row, square_sprite.col) in self.next_moves.keys():
+                    # Make move if move in allowed moves for selected piece
+                    move = (square_sprite.row, square_sprite.col)
+                    if move in self.next_moves.keys():
+                        piece = self.SELECTED_PIECE.data
+                        pos = (self.SELECTED_PIECE.x, self.SELECTED_PIECE.y)
                         self.board.move(
-                            piece=self.SELECTED_PIECE.data,  # type: ignore
-                            old=(self.SELECTED_PIECE.x, self.SELECTED_PIECE.y),  # type: ignore
-                            new=(square_sprite.row, square_sprite.col),
+                            piece=piece,
+                            old=pos,
+                            new=move,
                         )
+                        logging.info(f"{piece} MOVED from {pos} to {move}")
 
-                        self.SELECTED_PIECE.x = square_sprite.row  # type: ignore
-                        self.SELECTED_PIECE.y = square_sprite.col  # type: ignore
-                        self.SELECTED_PIECE.move(  # type: ignore
-                            left=self._get_coords(square_sprite.col),
-                            top=self._get_coords(square_sprite.row),
+                        # Capture opponent piece
+                        captured_position = self.next_moves.get(move)
+                        if captured_position:
+                            captured_piece = self.board.pieces[captured_position]
+                            self.board._remove(pos=captured_position)
+                            logging.info(
+                                f"{captured_piece} CAPTURED at {captured_position}"
+                            )
+
+                        # Next turn
+                        self.next_turn()
+                        logging.info(f"Next turn: {self.turn} player: {self.player}")
+
+                        # Get new available moves
+                        self.PLAYER_MOVES = self.board._get_player_moves(self.player)
+
+                        # Update the board
+                        self._update_board()
+
+                        # Reset the board
+                        self._reset_board()
+
+                        # Handle multiple capture moves
+                        if max([len(move) for move in self.piece_moves]) > 1:
+                            # Override player because of multiple capture
+                            self.player = Player(-self.player.value)
+                            self.PLAYER_MOVES = self.board._get_player_moves(
+                                self.player
+                            )
+
+                            # Force selecting multiple jump piece if path can continue
+                            if move in self.PLAYER_MOVES:
+                                self.select_piece(x, y)
+                                self.MULTIPLE_CAPTURE = (x, y)
+                            else:
+                                # Reset player to next player
+                                self.player = Player(-self.player.value)
+                                self.PLAYER_MOVES = self.board._get_player_moves(
+                                    self.player
+                                )
+                        else:
+                            self.MULTIPLE_CAPTURE = None
+
+                    elif self.MULTIPLE_CAPTURE:
+                        logging.warning(
+                            f"Move {move} not allowed! You need to complete the capture path."
                         )
-
-                        captured_pos = self.next_moves.get(
-                            (square_sprite.row, square_sprite.col)
-                        )
-                        if captured_pos:
-                            self.board._remove(pos=captured_pos)
-                            for piece_sprite in self.pieces_sprites:
-                                if (piece_sprite.x, piece_sprite.y) == captured_pos:
-                                    self.pieces_sprites.remove(piece_sprite)
-
-                        self.SELECTED_PIECE = None
-
-                        for square_sprite in self.squares_sprites:
-                            square_sprite.reset()
 
                     else:
-                        print("Not allowed")
-                        self.SELECTED_PIECE = None
-                        # Duplicated
-                        for square_sprite in self.squares_sprites:
-                            square_sprite.reset()
+                        logging.warning(f"Move {move} not allowed!")
+                        self._reset_board()
 
-    def show(self):
+    def play(self):
         """
-        Display the game environment.
+        Start the game environment.
         """
         clock = pygame.time.Clock()
         clock.tick(60)
@@ -92,6 +151,13 @@ class Environment(Window):
                 x, y = pygame.mouse.get_pos()
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     self.select_piece(x, y)
+
+                else:
+                    if not self.MULTIPLE_CAPTURE:
+                        self.hover(x, y)
+                    else:
+                        x, y = self.MULTIPLE_CAPTURE
+                        self.hover(x, y)
 
             self.blink()
 

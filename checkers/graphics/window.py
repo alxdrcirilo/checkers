@@ -100,6 +100,29 @@ class Window(MockGame):
                 end = (left + SIZE, top + SIZE)
                 pygame.draw.line(self.screen, GRAY, start, end, width)
 
+    def _update_board(self) -> None:
+        """
+        Update the board based on its state.
+
+        Clears all piece sprites.
+        Gets new piece sprites based on new board state.
+        Draws new piece sprites.
+        """
+        self.pieces_sprites.empty()
+        self.__get_pieces()
+        self.pieces_sprites.draw(self.screen)
+
+    def _reset_board(self) -> None:
+        """
+        Reset the board based on its state.
+
+        Clears highlighted moves.
+        Unselects focused pieces.
+        """
+        self.SELECTED_PIECE = None
+        for square_sprite in self.squares_sprites:
+            square_sprite.reset()
+
     def __get_squares(self) -> None:
         """
         Create and add square sprites to the sprite group.
@@ -142,14 +165,14 @@ class Window(MockGame):
 
         # Get moves (paths) that selected piece can make
         piece_position = (piece_sprite.x, piece_sprite.y)
-        all_moves = self.board._get_player_moves(
+        self.piece_moves = self.board._get_all_player_moves(
             player=piece_sprite.data.player,
             position=piece_position,
         )[piece_position]
 
         # Get imminent next moves
         self.next_moves = {}
-        for move in all_moves:
+        for move in self.piece_moves:
             jump, capture = move.pop(1)
             self.next_moves[jump] = capture
 
@@ -157,18 +180,18 @@ class Window(MockGame):
         for jump, capture in self.next_moves.items():
             jump_x, jump_y = self._get_coords(jump[1]), self._get_coords(jump[0])
 
-            for square in self.squares_sprites:
-                if square.rect.collidepoint(jump_x, jump_y):
-                    square.color = JUMP
+            for square_sprite in self.squares_sprites:
+                if square_sprite.rect.collidepoint(jump_x, jump_y):
+                    square_sprite.color = JUMP
                     break
 
             if capture:
                 capture_x, capture_y = self._get_coords(capture[1]), self._get_coords(
                     capture[0]
                 )
-                for square in self.squares_sprites:
-                    if square.rect.collidepoint(capture_x, capture_y):
-                        square.color = CAPTURE
+                for square_sprite in self.squares_sprites:
+                    if square_sprite.rect.collidepoint(capture_x, capture_y):
+                        square_sprite.color = CAPTURE
                         break
 
             # Update board
@@ -180,14 +203,33 @@ class Window(MockGame):
         """
         Blink available moves for selected piece.
         """
-        if self.SELECTED_PIECE:  # type: ignore
+        if self.SELECTED_PIECE:
             current_time = pygame.time.get_ticks()
             if current_time - self.TIMER >= self.BLINK_INTERVAL:
                 self.HIGHLIGHT_SQUARE = not self.HIGHLIGHT_SQUARE
                 self.TIMER = current_time
 
             if self.HIGHLIGHT_SQUARE:
-                self._get_available_moves(self.SELECTED_PIECE)  # type: ignore
+                self._get_available_moves(self.SELECTED_PIECE)
             else:
                 for square in self.squares_sprites:
                     square.reset()
+
+    def hover(self, x: int, y: int) -> None:
+        """
+        Hover a piece on the board and focus if piece belongs to current player.
+
+        :param int x: x coordinate of the hovered position
+        :param int y: y coordinate of the hovered position
+        """
+        allowed_moves = self.board._get_player_moves(self.player)
+        for piece_sprite in self.pieces_sprites:
+            if piece_sprite.rect.collidepoint(x, y):
+                piece_sprite_position = (piece_sprite.x, piece_sprite.y)
+                if (
+                    piece_sprite.data.player is self.player
+                    and piece_sprite_position in allowed_moves
+                ):
+                    piece_sprite.focus(unselect=False)
+            else:
+                piece_sprite.focus(unselect=True)
