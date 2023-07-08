@@ -118,8 +118,10 @@ class Window(MockGame):
 
         Clears highlighted moves.
         Unselects focused pieces.
+        Get new allowed player moves.
         """
         self.SELECTED_PIECE = None
+        self.PLAYER_MOVES = self.board._get_player_moves(self.player)
         for square_sprite in self.squares_sprites:
             square_sprite.reset()
 

@@ -108,9 +108,6 @@ class Environment(Window):
                         # Reset the board
                         self._reset_board()
 
-                        # Get player moves
-                        self.PLAYER_MOVES = self.board._get_player_moves(self.player)
-
                         # Handle multiple capture moves
                         if max([len(move) for move in self.piece_moves]) > 1:
                             # Force selecting multiple jump piece if path can continue
@@ -146,23 +143,50 @@ class Environment(Window):
         clock = pygame.time.Clock()
         clock.tick(60)
 
-        while not self.winner:
+        while not self.is_game_over():
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
 
-                x, y = pygame.mouse.get_pos()
-                if event.type == pygame.MOUSEBUTTONDOWN:
-                    self.select_piece(x, y)
+                if self.player is self.HUMAN_PLAYER:
+                    x, y = pygame.mouse.get_pos()
+                    if event.type == pygame.MOUSEBUTTONDOWN:
+                        self.select_piece(x, y)
+
+                    else:
+                        if not self.MULTIPLE_CAPTURE:
+                            self.hover(x, y)
+                        else:
+                            # If in multiple capture, force focus on piece
+                            x, y = self.MULTIPLE_CAPTURE
+                            self.hover(x, y)
 
                 else:
-                    if not self.MULTIPLE_CAPTURE:
-                        self.hover(x, y)
-                    else:
-                        # If in multiple capture, force focus on piece
-                        x, y = self.MULTIPLE_CAPTURE
-                        self.hover(x, y)
+                    opponent_move = self.board._get_random_move(self.player)
+                    while len(opponent_move) > 1:
+                        source, _ = opponent_move.pop(0)
+                        try:
+                            target, capture = opponent_move[0]
+                        except IndexError:
+                            print(self.board._get_all_player_moves(self.player))
+
+                        # Move
+                        piece = self.board.pieces[source]
+                        self.board.move(piece=piece, old=source, new=target)
+                        logging.info(f"{piece} MOVED from {source} to {target}")
+
+                        # Cature
+                        if capture:
+                            captured_piece = self.board.pieces[capture]
+                            self.board._remove(pos=capture)
+                            logging.info(f"{captured_piece} CAPTURED at {capture}")
+
+                    self.next_turn()
+                    logging.info(f"Next turn: {self.turn} player: {self.player}")
+
+                    self._reset_board()
+                    self._update_board()
 
             self.blink()
 
@@ -170,4 +194,4 @@ class Environment(Window):
             self.pieces_sprites.draw(self.screen)
             pygame.display.flip()
 
-        pygame.quit()
+        print(self.stats)
