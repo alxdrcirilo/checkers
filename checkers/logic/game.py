@@ -107,23 +107,3 @@ class Game:
         if not multiple_jump:
             self.player = Player(-self.player.value)
         self._turn += 1
-
-    def is_game_over(self) -> bool:
-        """
-        Check if the game is over (i.e. opponent has no more moves).
-        Sets winner accordingly.
-
-        :return bool: True if game is over
-        """
-        for player in [Player.BLACK, Player.WHITE]:
-            try:
-                opponent = Player(-player.value)
-                if not self.board._get_all_player_moves(player=opponent):
-                    raise NoMoves(opponent)
-                return False
-
-            except NoMoves:
-                self.winner = player
-                return True
-
-        return False
