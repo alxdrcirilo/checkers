@@ -29,7 +29,7 @@ jobs:
 
       - name: Run tests with coverage
         run: |
-          pytest --cov
+          pytest --cov=checkers
 
       - name: Upload coverage to Coveralls
         uses: coverallsapp/github-action@v2.1.0
