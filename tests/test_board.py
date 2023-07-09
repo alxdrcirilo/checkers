@@ -44,7 +44,7 @@ class TestBoard:
         assert isinstance(removed_piece, Piece)
 
         # Remove piece
-        captured = board._remove(position)
+        captured = board.remove(position)
 
         # Assert piece has been removed
         assert not board._state[position]
@@ -66,7 +66,7 @@ class TestBoard:
         assert not board._state[position]
 
         # Restore piece
-        board._restore(position, piece)
+        board.restore(position, piece)
 
         # Assert piece has been restored
         assert board._state[position] is piece
@@ -91,7 +91,7 @@ class TestBoard:
         ],
     )
     def test_get_player_pos(self, board: Board, expected: Generator) -> None:
-        assert list(board._get_player_pos(player=Player.BLACK)) == expected
+        assert list(board._get_pieces(player=Player.BLACK)) == expected
 
     @pytest.mark.parametrize(
         "expected",
@@ -105,7 +105,7 @@ class TestBoard:
         ],
     )
     def test_get_player_moves(self, board: Board, expected: Generator) -> None:
-        assert list(board._get_all_player_moves(player=Player.BLACK)) == expected
+        assert list(board._get_player_tree(player=Player.BLACK)) == expected
 
     @pytest.mark.skip("WIP`")
     def test_get_piece_moves(self, board: Board) -> None:

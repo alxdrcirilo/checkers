@@ -27,7 +27,7 @@ class Environment(Window):
         super().__init__()
 
         # Initialize instance variables
-        self.PLAYER_MOVES: list = self.board._get_player_moves(self.player)
+        self.PLAYER_MOVES: list = self.board.get_player_moves(self.player)
         self.HUMAN_PLAYER: Player = Player.BLACK
         self.MULTIPLE_CAPTURE: tuple | None = None
         self.SELECTED_PIECE: PieceSprite | None = None
@@ -42,7 +42,7 @@ class Environment(Window):
         """
         self.next_turn()
         logging.info(f"Next turn: {self.turn} player: {self.player}")
-        self.PLAYER_MOVES = self.board._get_player_moves(self.player)
+        self.PLAYER_MOVES = self.board.get_player_moves(self.player)
         self.MULTIPLE_CAPTURE = None
 
     def select_piece(self, x: int, y: int) -> None:
@@ -97,7 +97,7 @@ class Environment(Window):
                         captured_position = self.next_moves.get(move)
                         if captured_position:
                             captured_piece = self.board.pieces[captured_position]
-                            self.board._remove(pos=captured_position)
+                            self.board.remove(pos=captured_position)
                             logging.info(
                                 f"{captured_piece} CAPTURED at {captured_position}"
                             )
@@ -143,7 +143,7 @@ class Environment(Window):
         clock = pygame.time.Clock()
         clock.tick(60)
 
-        while not self.is_game_over():
+        while not self.winner:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
@@ -163,13 +163,13 @@ class Environment(Window):
                             self.hover(x, y)
 
                 else:
-                    opponent_move = self.board._get_random_move(self.player)
+                    opponent_move = self.get_random_move(self.player)
                     while len(opponent_move) > 1:
                         source, _ = opponent_move.pop(0)
                         try:
                             target, capture = opponent_move[0]
                         except IndexError:
-                            print(self.board._get_all_player_moves(self.player))
+                            print(self.board._get_player_tree(self.player))
 
                         # Move
                         piece = self.board.pieces[source]
@@ -179,7 +179,7 @@ class Environment(Window):
                         # Cature
                         if capture:
                             captured_piece = self.board.pieces[capture]
-                            self.board._remove(pos=capture)
+                            self.board.remove(pos=capture)
                             logging.info(f"{captured_piece} CAPTURED at {capture}")
 
                     self.next_turn()

@@ -1,3 +1,5 @@
+from random import choice
+
 from checkers.logic.board import Board
 from checkers.logic.piece import Player
 
@@ -107,3 +109,14 @@ class Game:
         if not multiple_jump:
             self.player = Player(-self.player.value)
         self._turn += 1
+
+    def get_random_move(self, player: Player) -> list:
+        """
+        Return a random move by a given player.
+
+        :param Player player: player
+        :return Cell: position of random move
+        """
+        random_piece = choice(self.board.get_player_moves(player))
+        random_move = choice(self.board._get_player_tree(player)[random_piece])
+        return random_move

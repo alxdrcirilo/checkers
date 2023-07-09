@@ -1,6 +1,3 @@
-from collections.abc import Generator
-from random import choice
-
 import numpy as np
 
 from checkers.logic.node import Node
@@ -88,14 +85,14 @@ class Board:
         "param Cell pos: position
         """
         if piece.rank is Rank.PAWN:
-            x, y = pos
+            x, _ = pos
             if piece.player is Player.BLACK and x == 0:
                 piece.rank = Rank.KING
 
             elif piece.player is Player.WHITE and x == 7:
                 piece.rank = Rank.KING
 
-    def _remove(self, pos: Cell) -> Piece:
+    def remove(self, pos: Cell) -> Piece:
         """
         Remove piece at a given (<x>, <y>) position.
 
@@ -105,7 +102,7 @@ class Board:
         self._state[pos] = None
         return captured
 
-    def _restore(self, pos: Cell, piece: Piece) -> None:
+    def restore(self, pos: Cell, piece: Piece) -> None:
         """
         Restore piece at a given (<x>, <y>) position.
 
@@ -114,75 +111,64 @@ class Board:
         """
         self._state[pos] = piece
 
-    def _get_player_pos(self, player: Player) -> Generator:
+    def _get_pieces(self, player: Player) -> list:
         """
         Return player's pieces positions.
 
         :param Player player: player
-        :return list: Generator of pieces positions for a given player
+        :return list: list of pieces positions for a given player
         """
-        for pos, piece in self.pieces.items():
-            if piece.player is player:
-                yield (pos)
+        return [pos for pos, piece in self.pieces.items() if piece.player is player]
 
-    def _get_player_moves(self, player: Player) -> list:
+    def get_player_moves(self, player: Player) -> list:
         """
         Return the positions of the pieces that a given player can move.
+        Captures are compulsory. If no capture is available, return regular moves.
 
         :param Player player: player
         :return list: pieces positions that a given player can move
         """
-        allowed_moves = self._get_capture_player_moves(player)
-        if not allowed_moves:
-            allowed_moves = list(self._get_all_player_moves(player).keys())
+        captures = self._get_player_captures(player)
+        if not captures:
+            return list(self._get_player_tree(player).keys())
+        return captures
 
-        return allowed_moves
-
-    def _get_capture_player_moves(self, player: Player) -> list:
+    def _get_player_captures(self, player: Player) -> list:
         """
         Return the positions of the pieces that can capture other pieces for a given player.
 
         :param Player player: player
         :return list: pieces positions for a given player than can capture opponent pieces
         """
-        capture_player_moves = {}
-        player_moves = self._get_all_player_moves(player)
 
-        for position, moves in player_moves.items():
-            captures = []
-            for move in moves:
-                if isinstance(move[1], tuple):
-                    captures.append(move[1][1])
-                else:
-                    captures.append(None)
+        def _get_captures(moves: list) -> list:
+            """
+            Return the captured positions if any.
 
-            capture_player_moves[position] = list(set(captures))
+            :param list moves: list of moves
+            :return list: list of capture positions
+            """
+            return [
+                move[1][1] if isinstance(move[1], tuple) else None for move in moves
+            ]
 
-            if capture_player_moves[position] != [None]:
-                capture_player_moves[position] = True
-            else:
-                capture_player_moves[position] = False
+        moves = self._get_player_tree(player)
+        captures = {pos: set(_get_captures(moves)) for pos, moves in moves.items()}
+        return list(filter(lambda pos: any(captures[pos]), captures))
 
-        return [pos for pos, capture in capture_player_moves.items() if capture]
-
-    def _get_all_player_moves(
-        self, player: Player, position: Cell | None = None
-    ) -> dict:
+    def _get_player_tree(self, player: Player) -> dict:
         """
         Return the player's nodes based on its available pieces.
         Kings have special move attributes depending on the board configuration.
         Position is optional, if given: returns the moves at given position.
 
         :param Player player: player
-        :param Cell position: position
         :return dict: dict {<type>: {<position>: <node>}}
         """
-        positions = [position] if position else self._get_player_pos(player)
         moves = {}
-
-        for pos in positions:
+        for pos in self._get_pieces(player):
             root = Node(pos)
-            node = self._get_piece_moves(root)
+            node = self._get_piece_tree(root)
 
             # Only get pieces that can move
             if node.children:
@@ -191,7 +177,7 @@ class Board:
 
         return moves
 
-    def _get_piece_moves(
+    def _get_piece_tree(
         self,
         node: Node,
         directions: list = [],
@@ -216,15 +202,6 @@ class Board:
             x, y = pos
             return x in range(8) and y in range(8)
 
-        def _is_capture(pos) -> bool:
-            """
-            Return whether a piece can be captured.
-
-            :param Cell pos: position
-            :return bool: 'True' if piece can be captured
-            """
-            return _is_allowed(pos) and _is_free(pos)
-
         def _is_free(pos) -> bool:
             """
             Return whether a Cell is free.
@@ -233,6 +210,15 @@ class Board:
             :return bool: 'True' if node is free
             """
             return not self._state[pos]
+
+        def _is_capture(pos) -> bool:
+            """
+            Return whether a piece can be captured.
+
+            :param Cell pos: position
+            :return bool: 'True' if piece can be captured
+            """
+            return _is_allowed(pos) and _is_free(pos)
 
         def _is_opponent(pos) -> bool:
             """
@@ -272,7 +258,7 @@ class Board:
 
                             child = Node(position=next_pos)
                             child.captured = move
-                            captured = self._remove(move)
+                            captured = self.remove(move)
                             node.children.append(child)
 
                             if piece.rank is Rank.KING:
@@ -281,7 +267,7 @@ class Board:
                             else:
                                 dirs = []
 
-                            self._get_piece_moves(
+                            self._get_piece_tree(
                                 node=child, directions=dirs, from_capture=True
                             )
 
@@ -289,7 +275,7 @@ class Board:
                             self.move(piece, next_pos, pos)
 
                             # Restore captured piece
-                            self._restore(pos=move, piece=captured)
+                            self.restore(pos=move, piece=captured)
 
                 # Free cell
                 # Skip if coming from previous capture
@@ -315,16 +301,3 @@ class Board:
         self.state = (new, piece)
 
         self._is_king(piece, new)
-
-    def _get_random_move(self, player: Player) -> list[Cell]:
-        """
-        Return a random move by a given player.
-
-        :param Player player: player
-        :return Cell: position of random move
-        """
-        random_piece = choice(self._get_player_moves(player))
-        random_move = choice(
-            self._get_all_player_moves(player, random_piece)[random_piece]
-        )
-        return random_move
