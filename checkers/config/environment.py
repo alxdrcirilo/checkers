@@ -70,12 +70,14 @@ class Environment(Window):
 
                         else:
                             logging.warning(
-                                f"Can't select {piece.data}: there are pieces with capture moves."
+                                f"Can't select {piece.data}:"
+                                f"there are pieces with capture moves."
                             )
 
                     else:
                         logging.warning(
-                            f"Can't select piece from {Player(-self.player.value)} when current player is {self.player}!"
+                            f"Can't select piece from {Player(-self.player.value)} "
+                            f"when current player is {self.player}!"
                         )
 
         else:
@@ -127,7 +129,8 @@ class Environment(Window):
 
                     elif self.MULTIPLE_CAPTURE:
                         logging.warning(
-                            f"Move {move} not allowed! You need to complete the capture path."
+                            f"Move {move} not allowed! "
+                            f"You need to complete the capture path."
                         )
 
                     else:
