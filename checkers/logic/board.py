@@ -1,5 +1,6 @@
 import numpy as np
 
+from checkers.exceptions.moves import NoMoves
 from checkers.logic.node import Node
 from checkers.logic.piece import Piece, Player, Rank
 
@@ -301,3 +302,18 @@ class Board:
         self.state = (new, piece)
 
         self._is_king(piece, new)
+
+    def is_game_over(self) -> bool:
+        """
+        Returns True if the game is over.
+
+        :raises NoMoves: when a given player runs out of moves
+        :return bool: True if game is over, False otherwise
+        """
+        try:
+            for player in [Player.BLACK, Player.WHITE]:
+                if not self.get_player_moves(player):
+                    raise NoMoves(player)
+        except NoMoves:
+            return True
+        return False

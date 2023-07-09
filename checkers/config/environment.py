@@ -165,7 +165,7 @@ class Environment(Window):
         clock = pygame.time.Clock()
         clock.tick(60)
 
-        while not self.winner:
+        while not self.board.is_game_over():
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
