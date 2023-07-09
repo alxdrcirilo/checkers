@@ -37,7 +37,7 @@ class Window(MockGame):
         super().__init__()
 
         # Blinking variables
-        self.BLINK_INTERVAL = 400
+        self.BLINK_INTERVAL = 300
         self.HIGHLIGHT_SQUARE = True
         self.TIMER = 0
 
@@ -120,7 +120,7 @@ class Window(MockGame):
         Unselects focused pieces.
         Get new allowed player moves.
         """
-        self.SELECTED_PIECE = None
+        self.SELECTED = None
         self.PLAYER_MOVES = self.board.get_player_moves(self.player)
         for square_sprite in self.squares_sprites:
             square_sprite.reset()
@@ -166,14 +166,13 @@ class Window(MockGame):
         """
 
         # Get moves (paths) that selected piece can make
-        piece_position = (piece_sprite.x, piece_sprite.y)
-        self.piece_moves = self.board._get_player_tree(player=piece_sprite.data.player)[
-            piece_position
+        self.PIECE_MOVES = self.board._get_player_tree(piece_sprite.data.player)[
+            (piece_sprite.x, piece_sprite.y)
         ]
 
         # Get imminent next moves
         self.next_moves = {}
-        for move in self.piece_moves:
+        for move in self.PIECE_MOVES:
             jump, capture = move.pop(1)
             self.next_moves[jump] = capture
 
@@ -204,14 +203,14 @@ class Window(MockGame):
         """
         Blink available moves for selected piece.
         """
-        if self.SELECTED_PIECE:
+        if self.SELECTED:
             current_time = pygame.time.get_ticks()
             if current_time - self.TIMER >= self.BLINK_INTERVAL:
                 self.HIGHLIGHT_SQUARE = not self.HIGHLIGHT_SQUARE
                 self.TIMER = current_time
 
             if self.HIGHLIGHT_SQUARE:
-                self._get_available_moves(self.SELECTED_PIECE)
+                self._get_available_moves(self.SELECTED)
             else:
                 for square in self.squares_sprites:
                     square.reset()
