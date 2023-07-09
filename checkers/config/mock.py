@@ -34,7 +34,7 @@ class MockGame(Game):
             (7, 4),
         ]
         for piece in pieces_to_remove:
-            self.board._remove(piece)
+            self.board.remove(piece)
 
         # Convert a few pawns to kings
         pieces_to_crown = [(2, 5), (3, 2), (5, 6)]

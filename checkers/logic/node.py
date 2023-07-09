@@ -49,35 +49,3 @@ class Node:
                 return jumps
 
             return paths
-
-    @staticmethod
-    def get_readable_paths(paths: list) -> None:
-        """
-        Convert the given list of paths into readable defined paths.
-        Print the readable paths.
-
-        :param list[list[tuple]] paths: List of paths to be converted.
-        """
-        readable_paths = []
-        move_description = None
-        for path in paths:
-            readable_path = []
-            prev_position = path[0][0]
-
-            for start, capture in path[1:]:
-                if not capture and prev_position:
-                    move_description = f"Move from {prev_position} to {start}"
-                elif capture:
-                    move_description = f"Capture from {capture} to {start}"
-
-                prev_position = start
-
-                if move_description:
-                    readable_path.append(move_description)
-
-            readable_paths.append(readable_path)
-
-        for i, path in enumerate(readable_paths):
-            print(f"Path {i + 1}:")
-            for move in path:
-                print(f"  - {move}")
