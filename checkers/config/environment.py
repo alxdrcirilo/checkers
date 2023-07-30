@@ -36,7 +36,7 @@ class Environment(Window):
         self.player = self.HUMAN_PLAYER
         logging.info(f"Started game with {self.player}")
 
-    def __stop_multiple_capture(self):
+    def __stop_multiple_capture(self) -> None:
         """
         Helper method to stop multiple capture.
         """
@@ -137,35 +137,14 @@ class Environment(Window):
                         logging.warning(f"Move {move} not allowed!")
                         self._reset_board()
 
-    def _opponent_move(self, path: list) -> None:
-        """
-        Make opponent moves based on path.
-
-        :param list move: _description_
-        """
-        while len(path) > 1:
-            source, _ = path.pop(0)
-            target, capture = path[0]
-
-            # Move
-            piece = self.board.pieces[source]
-            self.board.move(piece=piece, old=source, new=target)
-            logging.info(f"{piece} MOVED from {source} to {target}")
-
-            # Cature
-            if capture:
-                captured_piece = self.board.pieces[capture]
-                self.board.remove(pos=capture)
-                logging.info(f"{captured_piece} CAPTURED at {capture}")
-
-    def play(self):
+    def play(self) -> None:
         """
         Start the game environment.
         """
         clock = pygame.time.Clock()
         clock.tick(60)
 
-        while not self.board.is_game_over():
+        while not self.is_game_over():
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
@@ -189,7 +168,7 @@ class Environment(Window):
 
                 # AI player turn
                 else:
-                    self._opponent_move(self.get_random_move(self.player))
+                    self._make_move(self.get_random_move(self.player))
 
                     self.next_turn()
                     logging.info(f"Next turn: {self.turn} player: {self.player}")
