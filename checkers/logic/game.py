@@ -1,5 +1,7 @@
+import logging
 from random import choice
 
+from checkers.exceptions.moves import NoMoves
 from checkers.logic.board import Board
 from checkers.logic.piece import Player
 
@@ -115,3 +117,40 @@ class Game:
         random_piece = choice(self.board.get_player_moves(player))
         random_move = choice(self.board._get_player_tree(player)[random_piece])
         return random_move
+
+    def _make_move(self, path: list) -> None:
+        """
+        Make opponent moves based on path.
+
+        :param list move: _description_
+        """
+        while len(path) > 1:
+            source, _ = path.pop(0)
+            target, capture = path[0]
+
+            # Move
+            piece = self.board.pieces[source]
+            self.board.move(piece=piece, old=source, new=target)
+            logging.info(f"{piece} MOVED from {source} to {target}")
+
+            # Cature
+            if capture:
+                captured_piece = self.board.pieces[capture]
+                self.board.remove(pos=capture)
+                logging.info(f"{captured_piece} CAPTURED at {capture}")
+
+    def is_game_over(self) -> bool:
+        """
+        Returns True if the game is over.
+
+        :raises NoMoves: when a given player runs out of moves
+        :return bool: True if game is over, False otherwise
+        """
+        try:
+            for player in [Player.BLACK, Player.WHITE]:
+                if not self.board.get_player_moves(player):
+                    self.winner = Player(-self.player.value)
+                    raise NoMoves(player)
+        except NoMoves:
+            return True
+        return False

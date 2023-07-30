@@ -2,10 +2,10 @@ from pathlib import Path
 
 import pygame
 
-from checkers.config.mock import MockGame
 from checkers.graphics.constants import *
 from checkers.graphics.sprites.piece import PieceSprite
 from checkers.graphics.sprites.square import SquareSprite
+from checkers.logic.game import Game
 from checkers.logic.piece import Piece
 
 pygame.init()
@@ -13,7 +13,7 @@ pygame.display.set_caption("Checkers")
 pygame.display.set_icon(pygame.image.load(Path("assets/icons/checkers.png")))
 
 
-class Window(MockGame):
+class Window(Game):
     """
     Window class.
 
