@@ -13,12 +13,11 @@ pygame.display.set_caption("Checkers")
 pygame.display.set_icon(pygame.image.load(Path("assets/icons/checkers.png")))
 
 
-class Window(Game):
+class Window:
     """
     Window class.
 
     Represents the window of the game.
-    This class extends the MockGame class.
     """
 
     def __init__(self, resolution=512) -> None:
@@ -26,6 +25,7 @@ class Window(Game):
         Initializes the Window class.
 
         :param int resolution: size of the game, defaults to 512 pixels
+        :ivar game: game
         :ivar BLINK_INTERVAL: interval (in milliseconds) for blinking
         :ivar HIGHLIGHT_SQUARE: indicates whether squares should be highlighted
         :ivar TIMER: timer value
@@ -34,7 +34,9 @@ class Window(Game):
         :ivar pieces: pygame sprite group for game pieces
         :ivar squares: pygame sprite group for squares
         """
-        super().__init__()
+        self.game = Game()
+        self.clock = pygame.time.Clock()
+        self.clock.tick(60)
 
         # Blinking variables
         self.BLINK_INTERVAL = 300
@@ -51,7 +53,7 @@ class Window(Game):
 
         self.__get_squares_sprites()
         self.__get_pieces_sprites()
-        self.__draw_board()
+        self._draw_board()
 
     @staticmethod
     def _get_coords(x: int) -> int:
@@ -63,7 +65,7 @@ class Window(Game):
         """
         return SIZE * x + BORDER_WIDTH * x + BORDER_WIDTH + SIZE // 2 - PIECE_SIZE // 2
 
-    def __draw_board(self) -> None:
+    def _draw_board(self) -> None:
         """
         Draw the board.
 
@@ -121,7 +123,7 @@ class Window(Game):
         Get new allowed player moves.
         """
         self.SELECTED = None
-        self.PLAYER_MOVES = self.board.get_player_moves(self.player)
+        self.PLAYER_MOVES = self.game.board.get_player_moves(self.game.player)
         for square_sprite in self.squares_sprites:
             square_sprite.reset()
 
@@ -129,7 +131,7 @@ class Window(Game):
         """
         Create and add square sprites to the sprite group.
         """
-        for row, col in self.board._state:
+        for row, col in self.game.board._state:
             color = BROWN if row % 2 != col % 2 else WHITE
             left = BORDER_WIDTH + SIZE * col + BORDER_WIDTH * col
             top = BORDER_WIDTH + SIZE * row + BORDER_WIDTH * row
@@ -143,7 +145,7 @@ class Window(Game):
         """
         Create and add piece sprites to the sprite group.
         """
-        for (row, col), node in self.board._state.items():
+        for (row, col), node in self.game.board._state.items():
             if type(node) is Piece:
                 piece = node
                 color = piece.player.name.lower()
@@ -166,7 +168,7 @@ class Window(Game):
         """
 
         # Get moves (paths) that selected piece can make
-        self.PIECE_MOVES = self.board._get_player_tree(piece_sprite.data.player)[
+        self.PIECE_MOVES = self.game.board._get_player_tree(piece_sprite.data.player)[
             (piece_sprite.x, piece_sprite.y)
         ]
 
@@ -222,14 +224,48 @@ class Window(Game):
         :param int x: x coordinate of the hovered position
         :param int y: y coordinate of the hovered position
         """
-        moves = self.board.get_player_moves(self.player)
+        moves = self.game.board.get_player_moves(self.game.player)
         for piece_sprite in self.pieces_sprites:
             if piece_sprite.rect.collidepoint(x, y):
                 piece_sprite_position = (piece_sprite.x, piece_sprite.y)
                 if (
-                    piece_sprite.data.player is self.player
+                    piece_sprite.data.player is self.game.player
                     and piece_sprite_position in moves
                 ):
                     piece_sprite.focus(unselect=False)
             else:
                 piece_sprite.focus(unselect=True)
+
+    def _slide_piece(self, sprite: PieceSprite, move: tuple) -> None:
+        """
+        Moving piece animation.
+        67 pixels apart per row/column.
+
+        :param PieceSprite sprite: piece sprite
+        :param tuple move: position to move to
+        """
+        start_x = self._get_coords(sprite.x)
+        start_y = self._get_coords(sprite.y)
+        end_x = self._get_coords(move[0])
+        end_y = self._get_coords(move[1])
+
+        fps = 67 * abs(sprite.x - move[0])
+        delta = 1
+
+        for _ in range(fps):
+            if end_x - start_x > 0:
+                sprite.rect.top += delta
+            else:
+                sprite.rect.top -= delta
+
+            if start_y - end_y > 0:
+                sprite.rect.left -= delta
+            else:
+                sprite.rect.left += delta
+
+            self._draw_board()
+            self.squares_sprites.draw(self.screen)
+            self.pieces_sprites.draw(self.screen)
+
+            self.clock.tick(fps * 2)
+            pygame.display.flip()

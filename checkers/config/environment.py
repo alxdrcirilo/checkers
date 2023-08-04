@@ -24,26 +24,27 @@ class Environment(Window):
         :ivar MULTIPLE_CAPTURE: (x, y) pixel coordinates of piece position if in multiple capture path
         :ivar SELECTED: currently selected game piece
         """
+        self.clock = pygame.time.Clock()
         super().__init__()
 
         # Initialize instance variables
-        self.PLAYER_MOVES: list = self.board.get_player_moves(self.player)
+        self.PLAYER_MOVES: list = self.game.board.get_player_moves(self.game.player)
         self.HUMAN_PLAYER: Player = Player.BLACK
         self.MULTIPLE_CAPTURE: tuple | None = None
         self.SELECTED: PieceSprite | None = None
 
         # Set human player as starting player
-        self.player = self.HUMAN_PLAYER
-        logging.info(f"Started game with {self.player}")
+        self.game.player = self.HUMAN_PLAYER
+        logging.info(f"Started game with {self.game.player}")
 
     def __stop_multiple_capture(self) -> None:
         """
         Helper method to stop multiple capture.
         """
-        self.next_turn()
-        logging.info(f"Next turn: {self.turn} player: {self.player}")
+        self.game.next_turn()
+        logging.info(f"Next turn: {self.game.turn} player: {self.game.player}")
 
-        self.PLAYER_MOVES = self.board.get_player_moves(self.player)
+        self.PLAYER_MOVES = self.game.board.get_player_moves(self.game.player)
         self.MULTIPLE_CAPTURE = None
 
     def select_piece(self, x: int, y: int) -> None:
@@ -57,7 +58,7 @@ class Environment(Window):
         if not self.SELECTED:
             for piece in self.pieces_sprites:
                 if piece.rect.collidepoint(x, y):
-                    if piece.data.player is self.player:
+                    if piece.data.player is self.game.player:
                         position = (piece.x, piece.y)
                         if position in self.PLAYER_MOVES:
                             # Log selected piece
@@ -76,8 +77,8 @@ class Environment(Window):
 
                     else:
                         logging.warning(
-                            f"Can't select piece from {Player(-self.player.value)} "
-                            f"when current player is {self.player}!"
+                            f"Can't select piece from {Player(-self.game.player.value)} "
+                            f"when current player is {self.game.player}!"
                         )
 
         else:
@@ -88,7 +89,11 @@ class Environment(Window):
                     if move in self.next_moves.keys():
                         piece = self.SELECTED.data
                         position = (self.SELECTED.x, self.SELECTED.y)
-                        self.board.move(
+
+                        # Slide piece
+                        self._slide_piece(sprite=self.SELECTED, move=move)
+
+                        self.game.board.move(
                             piece=piece,
                             old=position,
                             new=move,
@@ -98,8 +103,8 @@ class Environment(Window):
                         # Capture opponent piece
                         capture = self.next_moves.get(move)
                         if capture:
-                            captured_piece = self.board.pieces[capture]
-                            self.board.remove(pos=capture)
+                            captured_piece = self.game.board.pieces[capture]
+                            self.game.board.remove(pos=capture)
                             logging.info(f"{captured_piece} CAPTURED at {capture}")
 
                         # Update the board
@@ -113,9 +118,9 @@ class Environment(Window):
                             # Force selecting multiple jump piece if path can continue
                             if move in self.PLAYER_MOVES:
                                 # Next turn
-                                self.next_turn(multiple_jump=True)
+                                self.game.next_turn(multiple_jump=True)
                                 logging.info(
-                                    f"Next turn: {self.turn} player: {self.player}"
+                                    f"Next turn: {self.game.turn} player: {self.game.player}"
                                 )
                                 # Select same piece with multiple jump
                                 self.MULTIPLE_CAPTURE = (x, y)
@@ -141,17 +146,14 @@ class Environment(Window):
         """
         Start the game environment.
         """
-        clock = pygame.time.Clock()
-        clock.tick(60)
-
-        while not self.is_game_over():
+        while not self.game.is_game_over():
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
 
                 # Human player turn
-                if self.player is self.HUMAN_PLAYER:
+                if self.game.player is self.HUMAN_PLAYER:
                     x, y = pygame.mouse.get_pos()
                     if event.type == pygame.MOUSEBUTTONDOWN:
                         self.select_piece(x, y)
@@ -168,10 +170,18 @@ class Environment(Window):
 
                 # AI player turn
                 else:
-                    self._make_move(self.get_random_move(self.player))
+                    # Random move
+                    # self._make_move(self.get_random_move(self.game.player))
 
-                    self.next_turn()
-                    logging.info(f"Next turn: {self.turn} player: {self.player}")
+                    # Alpha-beta pruning move
+                    self.game._make_move(
+                        self.game.get_ai_move(player=self.game.player, depth=4)
+                    )
+
+                    self.game.next_turn()
+                    logging.info(
+                        f"Next turn: {self.game.turn} player: {self.game.player}"
+                    )
 
                     self._reset_board()
                     self._update_board()
@@ -182,4 +192,4 @@ class Environment(Window):
             self.pieces_sprites.draw(self.screen)
             pygame.display.flip()
 
-        print(self.stats)
+        print(self.game.stats)

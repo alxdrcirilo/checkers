@@ -1,6 +1,7 @@
 import logging
 from random import choice
 
+from checkers.ai.ab_pruning import AlphaBetaPruning
 from checkers.exceptions.moves import NoMoves
 from checkers.logic.board import Board
 from checkers.logic.piece import Player
@@ -118,6 +119,22 @@ class Game:
         random_move = choice(self.board._get_player_tree(player)[random_piece])
         return random_move
 
+    def get_ai_move(self, player: Player, depth: int) -> list:
+        """
+        Return the best move by a given player using alpha-beta pruning AI.
+
+        :param Player player: player
+        :param int depth: depth of alpha-beta pruning search
+        """
+        ai = AlphaBetaPruning()
+        best_move, _ = ai.minimax(
+            game=self,
+            depth=depth,
+            maximizer=True,
+            max_player=player,
+        )
+        return best_move
+
     def _make_move(self, path: list) -> None:
         """
         Make opponent moves based on path.
@@ -130,6 +147,7 @@ class Game:
 
             # Move
             piece = self.board.pieces[source]
+
             self.board.move(piece=piece, old=source, new=target)
             logging.info(f"{piece} MOVED from {source} to {target}")
 
