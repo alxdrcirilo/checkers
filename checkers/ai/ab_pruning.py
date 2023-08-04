@@ -1,12 +1,13 @@
 from copy import deepcopy
 from math import inf
 
-from checkers.logic.game import Game
+import numpy as np
+
 from checkers.logic.piece import Player, Rank
 
 
 class AlphaBetaPruning:
-    def evaluate(self, game: Game, max_player: Player) -> int:
+    def evaluate(self, game, max_player: Player) -> int:
         """
         Evaluate the game state for the specified player.
 
@@ -15,23 +16,27 @@ class AlphaBetaPruning:
         :return int: evaluation score for the given game state
         """
         score = 0
-        for p in [Player.BLACK, Player.WHITE]:
+        for player in [Player.BLACK, Player.WHITE]:
             for rank in [Rank.PAWN, Rank.KING]:
-                pieces = list(
-                    filter(lambda x: x.rank is rank, game.board.pieces.values())
+                pieces = dict(
+                    filter(
+                        lambda x: x[1].player is player and x[1].rank is rank,
+                        game.board.pieces.items(),
+                    )
                 )
+
                 pieces_score = len(pieces) * rank.value
 
-                if p is max_player:
+                if player is max_player:
                     score += pieces_score
                 else:
                     score -= pieces_score
 
-        return score
+        return int(score)
 
     def minimax(
         self,
-        game: Game,
+        game,
         depth: int,
         maximizer: bool,
         max_player: Player,
@@ -50,7 +55,7 @@ class AlphaBetaPruning:
         :return tuple[list | None, float]: best move found by the search and its evaluation score
         """
         if depth == 0 or game.is_game_over():
-            score = self.evaluate(game, game.player)
+            score = self.evaluate(game, max_player)
             return None, score
 
         if maximizer:
@@ -77,7 +82,7 @@ class AlphaBetaPruning:
                     if alpha >= beta:
                         break
 
-            return best_move, best_score # type: ignore
+            return best_move, best_score
 
         else:
             best_score = inf
@@ -103,4 +108,4 @@ class AlphaBetaPruning:
                     if alpha >= beta:
                         break
 
-            return best_move, best_score # type: ignore
+            return best_move, best_score
