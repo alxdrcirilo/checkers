@@ -147,7 +147,6 @@ class Game:
 
             # Move
             piece = self.board.pieces[source]
-
             self.board.move(piece=piece, old=source, new=target)
             logging.info(f"{piece} MOVED from {source} to {target}")
 
