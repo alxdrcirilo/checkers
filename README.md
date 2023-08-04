@@ -13,7 +13,7 @@ Checkers game with alpha-beta pruning implementation.
 - [x] Add docstrings to [window.py](https://github.com/alxdrcirilo/checkers/blob/main/checkers/graphics/window.py)
 - [x] Add logging (e.g. `INFO:REMOVE <PIECE>`)
 - [ ] Add more unit tests
-- [ ] Add working alpha-beta pruning AI
+- [x] Add working alpha-beta pruning AI
 
 ## Credits
 "Board Game Set - Checkers & Merels" [Game asset]. (n.d.). itch.io. Retrieved May 22, 2023, from https://mrserji.itch.io/board-game-set-checkers-merels
