@@ -1,8 +1,6 @@
 from copy import deepcopy
 from math import inf
 
-import numpy as np
-
 from checkers.logic.piece import Player, Rank
 
 
