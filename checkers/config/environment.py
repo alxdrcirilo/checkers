@@ -192,4 +192,14 @@ class Environment(Window):
             self.pieces_sprites.draw(self.screen)
             pygame.display.flip()
 
-        print(self.game.stats)
+        while True:
+            self.display_winner()
+            pygame.display.flip()
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+                elif event.type == pygame.KEYDOWN:
+                    pygame.quit()
+                    sys.exit()

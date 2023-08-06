@@ -269,3 +269,38 @@ class Window:
 
             self.clock.tick(fps * 2)
             pygame.display.flip()
+
+    def display_winner(self) -> None:
+        # Text
+        font = pygame.font.SysFont("Arial", 24)
+        text = font.render(f"Winner: {self.game.winner}", True, WHITE)
+
+        # Rect
+        width = text.get_width() + 180
+        height = text.get_height() + 140
+        rect = pygame.Rect(
+            (self.screen.get_height() - width) // 2,
+            (self.screen.get_height() - height) // 2,
+            width,
+            height,
+        )
+
+        # Draw textbox
+        pygame.draw.rect(self.screen, GRAY, rect)
+
+        # Calculate the position to center the text within the textbox
+        text_x = rect.centerx - text.get_width() // 2
+        text_y = rect.centery - text.get_height() // 2
+        self.screen.blit(text, (text_x, text_y))
+
+        # Turn text
+        font = pygame.font.SysFont("Arial", 20)
+        text = font.render(f"Turn: {self.game.turn}", True, WHITE)
+        text_x = rect.centerx - text.get_width() // 2
+        self.screen.blit(text, (text_x, text_y - 34))
+
+        # "Click anywhere to exit" text
+        font = pygame.font.SysFont("Arial", 12)
+        text = font.render(f"Press any keystroke to exit", True, WHITE)
+        text_x = rect.centerx - text.get_width() // 2
+        self.screen.blit(text, (text_x, text_y + 40))
