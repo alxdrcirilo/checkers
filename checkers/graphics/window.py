@@ -267,7 +267,7 @@ class Window:
             self.squares_sprites.draw(self.screen)
             self.pieces_sprites.draw(self.screen)
 
-            self.clock.tick(fps * 2)
+            self.clock.tick(fps * 3)
             pygame.display.flip()
 
     def display_winner(self) -> None:
