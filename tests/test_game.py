@@ -3,7 +3,7 @@ import pytest
 from checkers.exceptions.moves import NoMoves
 from checkers.logic.board import Board
 from checkers.logic.game import Game
-from checkers.logic.piece import Player, Piece
+from checkers.logic.piece import Piece, Player
 
 
 @pytest.fixture
