@@ -1,5 +1,4 @@
 import logging
-from copy import deepcopy
 from random import choice
 
 from checkers.ai.ab_pruning import AlphaBetaPruning
@@ -128,9 +127,8 @@ class Game:
         :param int depth: depth of alpha-beta pruning search
         """
         ai = AlphaBetaPruning()
-        game = deepcopy(self)
         best_move, _ = ai.minimax(
-            game=game,
+            game=self,
             depth=depth,
             maximizer=True,
             max_player=player,
