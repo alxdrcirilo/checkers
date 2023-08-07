@@ -256,7 +256,7 @@ class Board:
                         if _is_capture(next_pos):
                             # Store previous rank
                             previous_rank = piece.rank
-                            
+
                             # Move
                             self.move(piece, pos, next_pos)
 
