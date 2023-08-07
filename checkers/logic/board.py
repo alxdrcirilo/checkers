@@ -254,6 +254,10 @@ class Board:
                         next_pos = tuple((x + a, y + b))
 
                         if _is_capture(next_pos):
+                            # Store previous rank
+                            previous_rank = piece.rank
+                            
+                            # Move
                             self.move(piece, pos, next_pos)
 
                             child = Node(position=next_pos)
@@ -273,6 +277,10 @@ class Board:
 
                             # Undo move
                             self.move(piece, next_pos, pos)
+
+                            # Restore rank if changed
+                            if piece.rank != previous_rank:
+                                piece.rank = Rank.PAWN
 
                             # Restore captured piece
                             self.restore(pos=move, piece=captured)
