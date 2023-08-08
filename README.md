@@ -11,11 +11,16 @@ Checkers game with alpha-beta pruning implementation.
 
 ## Installation
 ### Setup Instructions
-1. Clone the repository: `git clone https://github.com/alxdrcirilo/checkers.git`
-2. Create a virtual environment: `virtualenv .venv`
-3. Activate the virtual environment: `source .venv/bin/activate`
-4. Install the required dependencies: `pip install -r requirements.txt`
-5. Run the game: `python main.py`
+1. Clone the repository:  
+`git clone https://github.com/alxdrcirilo/checkers.git`
+2. Create a virtual environment:  
+`virtualenv .venv`
+3. Activate the virtual environment:  
+`source .venv/bin/activate`
+4. Install the required dependencies:  
+`pip install -r requirements.txt`
+5. Run the game:  
+`python main.py`
 
 ## Running
 Alternatively, if you're on Windows, you can simply download the latest executable in [Releases](https://github.com/alxdrcirilo/checkers/releases).
