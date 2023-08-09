@@ -139,7 +139,7 @@ class Game:
         """
         Make opponent moves based on path.
 
-        :param list move: _description_
+        :param list path: move
         """
         while len(path) > 1:
             source, _ = path.pop(0)
