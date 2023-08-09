@@ -93,6 +93,7 @@ class Environment(Window):
                         # Slide piece
                         self._slide_piece(sprite=self.SELECTED, move=move)
 
+                        # Move piece
                         self.game.board.move(
                             piece=piece,
                             old=position,
@@ -142,6 +143,33 @@ class Environment(Window):
                         logging.warning(f"Move {move} not allowed!")
                         self._reset_board()
 
+    def _make_move_ui(self, path: list) -> None:
+        """
+        Make opponent moves based on path (required for _slide_piece()).
+
+        :param list path: move
+        """
+        while len(path) > 1:
+            source, _ = path.pop(0)
+            target, capture = path[0]
+
+            # Slide piece
+            x_source, y_source = list(map(lambda x: self._get_coords(x), source))
+            for sprite in self.pieces_sprites:
+                if sprite.rect.collidepoint(y_source, x_source):
+                    self._slide_piece(sprite=sprite, move=target)
+
+            # Move piece
+            piece = self.game.board.pieces[source]
+            self.game.board.move(piece=piece, old=source, new=target)
+            logging.info(f"{piece} MOVED from {source} to {target}")
+
+            # Cature
+            if capture:
+                captured_piece = self.game.board.pieces[capture]
+                self.game.board.remove(pos=capture)
+                logging.info(f"{captured_piece} CAPTURED at {capture}")
+
     def play(self) -> None:
         """
         Start the game environment.
@@ -174,9 +202,8 @@ class Environment(Window):
                     # self._make_move(self.get_random_move(self.game.player))
 
                     # Alpha-beta pruning move
-                    self.game._make_move(
-                        self.game.get_ai_move(player=self.game.player, depth=4)
-                    )
+                    ai_move = self.game.get_ai_move(player=self.game.player, depth=4)
+                    self._make_move_ui(ai_move)
 
                     self.game.next_turn()
                     logging.info(
