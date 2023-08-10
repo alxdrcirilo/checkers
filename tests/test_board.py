@@ -107,10 +107,6 @@ class TestBoard:
     def test_get_player_moves(self, board: Board, expected: Generator) -> None:
         assert list(board._get_player_tree(player=Player.BLACK)) == expected
 
-    @pytest.mark.skip("WIP`")
-    def test_get_piece_moves(self, board: Board) -> None:
-        pass
-
     @pytest.mark.parametrize(
         "piece, old, new",
         [
