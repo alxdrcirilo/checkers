@@ -7,7 +7,7 @@
 
 Checkers game with alpha-beta pruning implementation.
 
-![](https://raw.githubusercontent.com/alxdrcirilo/checkers/main/checkers.png)
+![](https://raw.githubusercontent.com/alxdrcirilo/checkers/main/docs/images/checkers.png)
 
 ## Installation
 ### Setup Instructions
