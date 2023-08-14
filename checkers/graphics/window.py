@@ -272,7 +272,7 @@ class Window:
 
     def display_winner(self) -> None:
         # Text
-        font = pygame.font.SysFont("Arial", 24)
+        font = pygame.font.Font("assets/fonts/OpenSans-Medium.ttf", 24)
         text = font.render(f"Winner: {self.game.winner}", True, WHITE)
 
         # Rect
@@ -294,13 +294,13 @@ class Window:
         self.screen.blit(text, (text_x, text_y))
 
         # Turn text
-        font = pygame.font.SysFont("Arial", 20)
+        font = pygame.font.Font("assets/fonts/OpenSans-Medium.ttf", 20)
         text = font.render(f"Turn: {self.game.turn}", True, WHITE)
         text_x = rect.centerx - text.get_width() // 2
         self.screen.blit(text, (text_x, text_y - 34))
 
         # "Click anywhere to exit" text
-        font = pygame.font.SysFont("Arial", 12)
+        font = pygame.font.Font("assets/fonts/OpenSans-Medium.ttf", 12)
         text = font.render(f"Press any keystroke to exit", True, WHITE)
         text_x = rect.centerx - text.get_width() // 2
         self.screen.blit(text, (text_x, text_y + 40))

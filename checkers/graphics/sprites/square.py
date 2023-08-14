@@ -39,7 +39,7 @@ class SquareSprite(pygame.sprite.Sprite):
         :param int col: column position of the square
         """
         color = WHITE if row % 2 != col % 2 else BLACK
-        self.font = pygame.font.SysFont("Arial", 9)
+        self.font = pygame.font.Font("assets/fonts/OpenSans-Medium.ttf", 9)
         self.text_surface = self.font.render(f"{row},{col}", True, color)
         self.image.blit(
             self.text_surface,

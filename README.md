@@ -36,4 +36,8 @@ To evaluate the competitivity of the AI player (`WHITE`), 100 iterations of 100 
 The `BLACK` player always starts first and is the human player. The `WHITE` player starts second and is the AI player.
 
 ## Credits
+### Assets
 "Board Game Set - Checkers & Merels" [Game asset]. (n.d.). itch.io. Retrieved May 22, 2023, from https://mrserji.itch.io/board-game-set-checkers-merels
+
+### Fonts
+This project uses the [Open Sans](https://fonts.google.com/specimen/Open+Sans) font.
