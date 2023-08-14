@@ -154,9 +154,8 @@ class Environment(Window):
             target, capture = path[0]
 
             # Slide piece
-            x_source, y_source = list(map(lambda x: self._get_coords(x), source))
             for sprite in self.pieces_sprites:
-                if sprite.rect.collidepoint(y_source, x_source):
+                if source == (sprite.x, sprite.y):
                     self._slide_piece(sprite=sprite, move=target)
 
             # Move piece
@@ -169,6 +168,9 @@ class Environment(Window):
                 captured_piece = self.game.board.pieces[capture]
                 self.game.board.remove(pos=capture)
                 logging.info(f"{captured_piece} CAPTURED at {capture}")
+
+            # Update the board
+            self._update_board()
 
     def play(self) -> None:
         """
