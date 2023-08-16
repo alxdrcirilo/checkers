@@ -22,14 +22,14 @@ def main():
     df = pd.DataFrame(columns=header)
     replicates = 100
 
-    with Pool(8) as pool:
-        for depth in range(7):
+    with Pool(12) as pool:
+        for depth in range(6):
             print(f"{depth=}")
             for result in tqdm.tqdm(
                 pool.imap(task, list(zip([depth] * replicates, range(replicates)))),
                 total=replicates,
             ):
-                df.loc[len(df.shape[0]) + 1] = result  # type: ignore
+                df.loc[df.shape[0] + 1] = result  # type: ignore
 
     df.to_csv(path_or_buf="results.csv", index=False)
 

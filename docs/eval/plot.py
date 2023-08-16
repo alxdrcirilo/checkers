@@ -5,7 +5,7 @@ import seaborn as sns
 # Read data
 df = pd.read_csv(filepath_or_buffer="docs/eval/results.csv")
 
-# Plot
+# Plot: boxplot games won by AI (WHITE)
 fig, ax = plt.subplots()
 sns.boxplot(data=df, x="depth", y="WHITE", ax=ax)
 ax.set(ylim=(0, 100), xlabel="Depth", ylabel="Number of games won (AI)")
@@ -30,3 +30,18 @@ for cat in categories:
     )
 sns.despine()
 plt.savefig("plot_games_won.png")
+
+# Plot: BLACK vs WHITE games won
+fig, ax = plt.subplots()
+sns.lineplot(data=df, x="depth", y="BLACK", ax=ax)
+sns.lineplot(data=df, x="depth", y="WHITE", ax=ax)
+ax.set(ylim=(0, 100), xlabel="Depth", ylabel="Number of games won")
+sns.despine()
+plt.savefig("plot_BLACK_vs_WHITE.png")
+
+# Plot: runtime
+fig, ax = plt.subplots()
+sns.lineplot(data=df, x="depth", y="runtime", ax=ax)
+ax.set(xlabel="Depth", ylabel="Runtime (min)")
+sns.despine()
+plt.savefig("plot_runtime.png")
